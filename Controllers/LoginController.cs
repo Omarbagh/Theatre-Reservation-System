@@ -2,6 +2,9 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using StarterKit.Services;
+using StarterKit.Models;
+using Microsoft.EntityFrameworkCore;
+ 
 
 namespace StarterKit.Controllers;
 
@@ -11,10 +14,15 @@ public class LoginController : Controller
 {
     private readonly ILoginService _loginService;
 
+    private readonly DatabaseContext _context;
 
-    public LoginController(ILoginService loginService)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public LoginController(ILoginService loginService, DatabaseContext context, IHttpContextAccessor httpContextAccessor)
     {
         _loginService = loginService;
+        _context = context;
+        _httpContextAccessor = httpContextAccessor;
     }
 
 
@@ -30,6 +38,7 @@ public class LoginController : Controller
         switch (loginStatus)
         {
             case LoginStatus.Success:
+                HttpContext.Session.SetString("Username", loginBody.Username);
                 return Ok("Login successful");
 
             case LoginStatus.IncorrectUsername:
@@ -42,10 +51,28 @@ public class LoginController : Controller
     }
 
     [HttpGet("IsAdminLoggedIn")]
-    public IActionResult IsAdminLoggedIn()
+    public async Task<IActionResult> IsAdminLoggedIn()
     {
-        // TODO: This method should return a status 200 OK when logged in, else 403, unauthorized
-        return Unauthorized("You are not logged in");
+        var username = HttpContext.Session.GetString("Username");
+        Console.WriteLine($"Username from HttpContext: {username}");
+
+        if (string.IsNullOrEmpty(username))
+        {
+            return Unauthorized(new { IsLoggedIn = false });
+        }
+
+        // Use LINQ to query the database
+        var admin = await _context.Admin
+            .Where(a => a.UserName == username)
+            .Select(a => a.UserName)
+            .FirstOrDefaultAsync();
+
+        if (admin != null)
+        {
+            return Ok(new { IsLoggedIn = true, AdminName = admin });
+        }
+
+        return Unauthorized(new { IsLoggedIn = false });
     }
 
     [HttpGet("Logout")]
