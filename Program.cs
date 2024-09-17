@@ -14,11 +14,11 @@ namespace StarterKit
 
             builder.Services.AddDistributedMemoryCache();
 
-            builder.Services.AddSession(options => 
+            builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromSeconds(10);
-                options.Cookie.HttpOnly = true; 
-                options.Cookie.IsEssential = true; 
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
             });
 
             builder.Services.AddScoped<ILoginService, LoginService>();
@@ -27,6 +27,7 @@ namespace StarterKit
                 options => options.UseSqlite(builder.Configuration.GetConnectionString("SqlLiteDb")));
 
             var app = builder.Build();
+            builder.Services.AddLogging();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
