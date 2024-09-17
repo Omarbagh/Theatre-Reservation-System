@@ -49,8 +49,9 @@ public class LoginService : ILoginService
                     {
                         string storedPassword = result.ToString();
                         // Hash the input password
-                        string hashedInputPassword = EncryptionHelper.HashPassword(inputPassword);
+                        string hashedInputPassword = EncryptionHelper.EncryptPassword(inputPassword);
                         // Compare hashed passwords
+
                         return hashedInputPassword == storedPassword ? LoginStatus.Success : LoginStatus.IncorrectPassword;
                     }
                     else
