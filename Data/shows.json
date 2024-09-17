@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "title": "Breaking Bad",
+        "genre": "Drama"
+    },
+    {
+        "id": 2,
+        "title": "Game of Thrones",
+        "genre": "Fantasy"
+    }
+]
