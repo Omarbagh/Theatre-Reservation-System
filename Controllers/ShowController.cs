@@ -17,8 +17,8 @@ public class ShowController : ControllerBase
     {
         var shows = await ReadShowsFromJsonAsync();
 
-        // Debug log
-        Console.WriteLine($"API Response: {JsonSerializer.Serialize(shows)}");
+        // // Debug log
+        // Console.WriteLine($"API Response: {JsonSerializer.Serialize(shows)}");
 
         if (shows == null || shows.Count == 0)
         {
