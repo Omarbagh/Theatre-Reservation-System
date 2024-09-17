@@ -1,66 +1,56 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
-using System.Text.Json.Serialization;
-
+using Microsoft.Data.Sqlite;
+using StarterKit.Models;
 
 [Route("api/v1/shows")]
 [ApiController]
 public class ShowController : ControllerBase
 {
-    private readonly string jsonFilePath = "Data/shows.json";
-
     [HttpGet]
     public async Task<IActionResult> GetAllShows()
     {
-        var shows = await ReadShowsFromJsonAsync();
+        string connectionString = @"Data Source=webdev.sqlite";
+        string query = "SELECT * FROM TheatreShow";
 
-        // // Debug log
-        // Console.WriteLine($"API Response: {JsonSerializer.Serialize(shows)}");
+        List<TheatreShow> shows = new List<TheatreShow>();
 
-        if (shows == null || shows.Count == 0)
+        try
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new SqliteCommand(query, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var show = new TheatreShow
+                        {
+                            TheatreShowId = reader.GetInt32(reader.GetOrdinal("TheatreShowId")),
+                            Title = reader.IsDBNull(reader.GetOrdinal("Title")) ? null : reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? null : reader.GetString(reader.GetOrdinal("Description")),
+                            Price = reader.GetDouble(reader.GetOrdinal("Price")),
+
+                        };
+                        shows.Add(show);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: " + ex.Message);
+            return StatusCode(500, "Internal server error.");
+        }
+
+        if (shows.Count == 0)
         {
             return NotFound("No shows available.");
         }
 
         return Ok(shows);
     }
-
-    private async Task<List<Show>> ReadShowsFromJsonAsync()
-    {
-        if (!System.IO.File.Exists(jsonFilePath))
-        {
-            Console.WriteLine("File does not exist.");
-            return null;
-        }
-
-        var jsonData = await System.IO.File.ReadAllTextAsync(jsonFilePath);
-        Console.WriteLine($"Read JSON data: {jsonData}");
-
-
-        var shows = JsonSerializer.Deserialize<List<Show>>(jsonData);
-        if (shows == null)
-        {
-            Console.WriteLine("Deserialization returned null.");
-        }
-        return shows;
-
-
-    }
 }
-
-
-public class Show
-{
-    [JsonPropertyName("id")]
-    public int Id { get; set; }
-
-    [JsonPropertyName("title")]
-    public string Title { get; set; }
-
-    [JsonPropertyName("genre")]
-    public string Genre { get; set; }
-}
-
