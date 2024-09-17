@@ -40,7 +40,7 @@ namespace StarterKit.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("Admin");
+                    b.ToTable("Admin", (string)null);
 
                     b.HasData(
                         new
@@ -97,7 +97,7 @@ namespace StarterKit.Migrations
 
                     b.HasKey("CustomerId");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customer", (string)null);
                 });
 
             modelBuilder.Entity("StarterKit.Models.Reservation", b =>
@@ -124,7 +124,7 @@ namespace StarterKit.Migrations
 
                     b.HasIndex("TheatreShowDateId");
 
-                    b.ToTable("Reservation");
+                    b.ToTable("Reservation", (string)null);
                 });
 
             modelBuilder.Entity("StarterKit.Models.TheatreShow", b =>
@@ -149,7 +149,7 @@ namespace StarterKit.Migrations
 
                     b.HasIndex("VenueId");
 
-                    b.ToTable("TheatreShow");
+                    b.ToTable("TheatreShow", (string)null);
                 });
 
             modelBuilder.Entity("StarterKit.Models.TheatreShowDate", b =>
@@ -168,7 +168,7 @@ namespace StarterKit.Migrations
 
                     b.HasIndex("TheatreShowId");
 
-                    b.ToTable("TheatreShowDate");
+                    b.ToTable("TheatreShowDate", (string)null);
                 });
 
             modelBuilder.Entity("StarterKit.Models.Venue", b =>
@@ -185,7 +185,7 @@ namespace StarterKit.Migrations
 
                     b.HasKey("VenueId");
 
-                    b.ToTable("Venue");
+                    b.ToTable("Venue", (string)null);
                 });
 
             modelBuilder.Entity("StarterKit.Models.Reservation", b =>
