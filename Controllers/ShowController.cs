@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
+[Route("api/v1/shows")]
 [ApiController]
 public class ShowController : ControllerBase
 {
