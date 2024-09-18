@@ -21,6 +21,8 @@ namespace StarterKit
                 options.Cookie.IsEssential = true;
             });
 
+            builder.Services.AddHttpContextAccessor();
+
             builder.Services.AddScoped<ILoginService, LoginService>();
 
             builder.Services.AddDbContext<DatabaseContext>(
@@ -41,6 +43,8 @@ namespace StarterKit
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
