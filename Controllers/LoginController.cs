@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using StarterKit.Services;
 using StarterKit.Models;
 using Microsoft.EntityFrameworkCore;
- 
+
+using Microsoft.AspNetCore.Session;
+
 
 namespace StarterKit.Controllers;
 
@@ -24,10 +26,6 @@ public class LoginController : Controller
         _context = context;
         _httpContextAccessor = httpContextAccessor;
     }
-
-
-
-
 
 
     [HttpPost("Login")]
@@ -53,8 +51,9 @@ public class LoginController : Controller
     [HttpGet("IsAdminLoggedIn")]
     public async Task<IActionResult> IsAdminLoggedIn()
     {
+
+        // Get the username from the HTTP context directly
         var username = HttpContext.Session.GetString("Username");
-        Console.WriteLine($"Username from HttpContext: {username}");
 
         if (string.IsNullOrEmpty(username))
         {
