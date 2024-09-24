@@ -152,12 +152,11 @@ public class ShowController : ControllerBase
     [HttpDelete("DeleteShow/{id}")]
     public async Task<IActionResult> DeleteShow(int id)
     {
-        // Check if admin is logged in
         var adminCheckResult = IsAdminLoggedIn();
 
-        if (!adminCheckResult)  // If the user is not an admin, return unauthorized
+        if (!adminCheckResult)
         {
-            return Unauthorized("Only admins can delete shows.");
+            return Unauthorized("Only admins can create new shows.");
         }
 
         // Find the show by id

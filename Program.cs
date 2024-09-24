@@ -16,14 +16,14 @@ namespace StarterKit
 
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.IdleTimeout = TimeSpan.FromSeconds(20);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
 
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddScoped<ILoginService, LoginService>();
+            builder.Services.AddSingleton<ILoginService, LoginService>();
 
             builder.Services.AddDbContext<DatabaseContext>(
                 options => options.UseSqlite(builder.Configuration.GetConnectionString("SqlLiteDb")));
@@ -47,7 +47,7 @@ namespace StarterKit
             app.UseAuthentication();
 
             app.UseAuthorization();
-            
+
             app.UseSession();
 
             app.MapControllerRoute(
