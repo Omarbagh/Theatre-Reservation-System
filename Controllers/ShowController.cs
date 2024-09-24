@@ -147,6 +147,82 @@ public class ShowController : ControllerBase
             return StatusCode(500, "An error occurred while creating the show: " + ex.Message);
         }
     }
+    [HttpPut("UpdateShow/{id}")]
+    public async Task<IActionResult> UpdateShow(int id, [FromBody] TheatreShow show)
+    {
+        var adminCheckResult = IsAdminLoggedIn();
+
+        if (!adminCheckResult)
+        {
+            return Unauthorized("Only admins can update shows.");
+        }
+
+        // Find the existing show by id
+        var oldShow = await _context.TheatreShow.Include(s => s.theatreShowDates)
+                                                .Include(s => s.Venue)
+                                                .FirstOrDefaultAsync(s => s.TheatreShowId == id);
+
+        if (oldShow == null)
+        {
+            return NotFound("Show not found.");
+        }
+
+        try
+        {
+            // Only update fields if they have valid values in the incoming request
+
+            if (!string.IsNullOrEmpty(show.Title))
+            {
+                oldShow.Title = show.Title;
+            }
+
+            if (!string.IsNullOrEmpty(show.Description))
+            {
+                oldShow.Description = show.Description;
+            }
+
+            if (show.Price > 0)
+            {
+                oldShow.Price = show.Price;
+            }
+
+            // Update venue if provided and valid
+            if (show.Venue != null && oldShow.Venue.VenueId != show.Venue.VenueId)
+            {
+                var newVenue = await _context.Venue.FindAsync(show.Venue.VenueId);
+                if (newVenue == null)
+                {
+                    return NotFound("Venue not found.");
+                }
+                oldShow.Venue = newVenue;
+            }
+
+            // Update TheatreShowDates if provided
+            if (show.theatreShowDates != null && show.theatreShowDates.Any())
+            {
+                _context.TheatreShowDate.RemoveRange(oldShow.theatreShowDates);
+
+                foreach (var date in show.theatreShowDates)
+                {
+                    oldShow.theatreShowDates.Add(new TheatreShowDate
+                    {
+                        DateAndTime = date.DateAndTime
+                    });
+                }
+            }
+
+            // Save changes
+            _context.TheatreShow.Update(oldShow);
+            await _context.SaveChangesAsync();
+
+            return Ok("Show updated successfully.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while updating the show: {ex.Message}");
+        }
+    }
+
 
 
     [HttpDelete("DeleteShow/{id}")]
