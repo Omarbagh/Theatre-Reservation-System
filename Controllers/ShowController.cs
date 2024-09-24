@@ -118,7 +118,7 @@ public class ShowController : ControllerBase
     [HttpPost("AddShow")]
     public async Task<IActionResult> CreateShow([FromBody] TheatreShow newShow)
     {
-        var adminCheckResult = await IsAdminLoggedIn();
+        var adminCheckResult = IsAdminLoggedIn();
 
         if (!adminCheckResult)
         {
@@ -127,6 +127,17 @@ public class ShowController : ControllerBase
 
         try
         {
+            // Detach the venue if it exists to avoid re-inserting it
+            var existingVenue = await _context.Venue.FindAsync(newShow.Venue.VenueId);
+
+            if (existingVenue == null)
+            {
+                return NotFound("Venue not found.");
+            }
+
+            // Assign the existing venue to the new show
+            newShow.Venue = existingVenue;
+
             _context.TheatreShow.Add(newShow);
             await _context.SaveChangesAsync();
             return Ok("Show created successfully");
@@ -137,7 +148,44 @@ public class ShowController : ControllerBase
         }
     }
 
-    private async Task<bool> IsAdminLoggedIn()
+
+    [HttpDelete("DeleteShow/{id}")]
+    public async Task<IActionResult> DeleteShow(int id)
+    {
+        var adminCheckResult = IsAdminLoggedIn();
+
+        if (!adminCheckResult)
+        {
+            return Unauthorized("Only admins can create new shows.");
+        }
+
+        // Find the show by id
+        var show = await _context.TheatreShow.Include(s => s.theatreShowDates).FirstOrDefaultAsync(s => s.TheatreShowId == id);
+
+        if (show == null)
+        {
+            return NotFound("Show not found.");
+        }
+
+        try
+        {
+            // Remove the associated TheatreShowDates first
+            _context.TheatreShowDate.RemoveRange(show.theatreShowDates);
+
+            // Then remove the show
+            _context.TheatreShow.Remove(show);
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+            return Ok("Show deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while deleting the show: {ex.Message}");
+        }
+    }
+
+    private bool IsAdminLoggedIn()
     {
         var username = _httpContextAccessor.HttpContext?.Session.GetString("Username");
 
@@ -146,12 +194,13 @@ public class ShowController : ControllerBase
             return false;
         }
 
-        var admin = await _context.Admin
+        var admin = _context.Admin
             .Where(a => a.UserName == username)
             .Select(a => a.UserName)
-            .FirstOrDefaultAsync();
+            .FirstOrDefault();
 
         return admin != null;
     }
-    
+
+
 }
