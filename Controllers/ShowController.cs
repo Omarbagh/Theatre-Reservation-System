@@ -20,7 +20,7 @@ public class ShowController : ControllerBase
         _context = context;
     }
     [HttpGet]
-    public async Task<IActionResult> GetAllShows(string filter)
+    public async Task<IActionResult> GetAllShows()
     {
         string connectionString = @"Data Source=webdev.sqlite";
         string query = @"
@@ -110,6 +110,22 @@ public class ShowController : ControllerBase
 
         // 1.3 Add a parameter that allows you to filter the list of shows by title or description.
 
+
+        if (shows.Count == 0)
+        {
+            return NotFound("No shows available.");
+        }
+
+        return Ok(shows);
+    }
+
+
+    [HttpGet("filter")]
+    public async Task<IActionResult> Filter(string filter)
+    {
+        // Assuming _context is your database context
+        var shows = await _context.TheatreShow.ToListAsync();
+
         if (!string.IsNullOrEmpty(filter))
         {
             shows = shows
@@ -117,11 +133,6 @@ public class ShowController : ControllerBase
                     (ts.Title != null && ts.Title.Contains(filter, StringComparison.OrdinalIgnoreCase)) ||
                     (ts.Description != null && ts.Description.Contains(filter, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
-        }
-
-        if (shows.Count == 0)
-        {
-            return NotFound("No shows available.");
         }
 
         return Ok(shows);
