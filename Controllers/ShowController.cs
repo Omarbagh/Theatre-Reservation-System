@@ -20,7 +20,7 @@ public class ShowController : ControllerBase
         _context = context;
     }
     [HttpGet]
-    public async Task<IActionResult> GetAllShows()
+    public async Task<IActionResult> GetAllShows(string filter)
     {
         string connectionString = @"Data Source=webdev.sqlite";
         string query = @"
@@ -105,6 +105,18 @@ public class ShowController : ControllerBase
         {
             Console.WriteLine("An error occurred: " + ex.Message);
             return StatusCode(500, "Internal server error.");
+        }
+
+
+        // 1.3 Add a parameter that allows you to filter the list of shows by title or description.
+
+        if (!string.IsNullOrEmpty(filter))
+        {
+            shows = shows
+                .Where(ts =>
+                    (ts.Title != null && ts.Title.Contains(filter, StringComparison.OrdinalIgnoreCase)) ||
+                    (ts.Description != null && ts.Description.Contains(filter, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
         }
 
         if (shows.Count == 0)
