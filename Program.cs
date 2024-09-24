@@ -16,7 +16,7 @@ namespace StarterKit
 
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(20);
+                options.IdleTimeout = TimeSpan.FromSeconds(200);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
