@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using StarterKit.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 
 [Route("api/v1/shows")]
@@ -108,9 +107,6 @@ public class ShowController : ControllerBase
         }
 
 
-        // 1.3 Add a parameter that allows you to filter the list of shows by title or description.
-
-
         if (shows.Count == 0)
         {
             return NotFound("No shows available.");
@@ -120,10 +116,13 @@ public class ShowController : ControllerBase
     }
 
 
+
     [HttpGet("filter")]
-    public async Task<IActionResult> Filter(string filter)
+
+    // 1.3 Add a parameter that allows you to filter the list of shows by title or description.
+
+    public async Task<IActionResult> FilterOnTitleOrDesc(string filter)
     {
-        // Assuming _context is your database context
         var shows = await _context.TheatreShow.ToListAsync();
 
         if (!string.IsNullOrEmpty(filter))
@@ -137,6 +136,28 @@ public class ShowController : ControllerBase
 
         return Ok(shows);
     }
+
+
+    // [HttpGet("filter/location")]
+    // public async Task<IActionResult> FilterOnLocation(string filter)
+    // {
+    //     var showsQuery = _context.TheatreShow
+    //                              .Include(ts => ts.Venue)
+    //                              .AsQueryable();
+
+    //     if (!string.IsNullOrEmpty(filter))
+    //     {
+    //         showsQuery = showsQuery
+    //             .Where(ts => ts.Venue != null &&
+    //                          ts.Venue.Name.ToLower() == filter.ToLower());
+    //     }
+
+    //     var shows = await showsQuery.ToListAsync();
+
+    //     return Ok(shows);
+    // }
+
+
 
     [HttpPost("AddShow")]
     public async Task<IActionResult> CreateShow([FromBody] TheatreShow newShow)
