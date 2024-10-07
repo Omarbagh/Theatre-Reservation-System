@@ -5,6 +5,8 @@ using Microsoft.Data.Sqlite;
 using StarterKit.Models;
 using Microsoft.EntityFrameworkCore;
 
+using System.Text.Json;
+
 
 [Route("api/v1/shows")]
 [ApiController]
@@ -118,6 +120,27 @@ public class ShowController : ControllerBase
 
         return Ok(shows);
     }
+    [HttpGet("id/{id}")]
+    public async Task<IActionResult> FindId(int id)
+    {
+        var show = await _context.TheatreShow
+                                 .Include(s => s.Venue)
+                                 .Include(s => s.theatreShowDates)
+                                 .FirstOrDefaultAsync(s => s.TheatreShowId == id);
+
+        if (show == null)
+        {
+            return NotFound($"Show with ID {id} not found.");
+        }
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+        };
+
+        return new JsonResult(show, jsonOptions);
+    }
+
 
 
     [HttpGet("filter")]
