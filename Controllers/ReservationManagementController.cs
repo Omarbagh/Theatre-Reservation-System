@@ -68,7 +68,7 @@ public class ReservationManagementController : ControllerBase
 
         if (!adminCheckResult)
         {
-            return Unauthorized("Only admins can Delete reservation(s).");
+            return Unauthorized("Only admins can Delete reservations.");
         }
 
         // Find the show by id
@@ -77,7 +77,6 @@ public class ReservationManagementController : ControllerBase
         {
             return NotFound("Reservation not found.");
         }
-        //lala
         try
         {
             // Remove the reservation
@@ -88,7 +87,7 @@ public class ReservationManagementController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"An error occurred while deleting the show: {ex.Message}");
+            return StatusCode(500, $"An error occurred while deleting the reservation: {ex.Message}");
         }
     }
 
