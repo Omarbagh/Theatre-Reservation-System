@@ -146,7 +146,6 @@ public class ShowController : ControllerBase
     [HttpGet("filter")]
     public async Task<IActionResult> FilteronTitle(string filter)
     {
-        // Assuming _context is your database context
         var shows = await _context.TheatreShow.ToListAsync();
 
         if (!string.IsNullOrEmpty(filter))
@@ -160,6 +159,27 @@ public class ShowController : ControllerBase
 
         return Ok(shows);
     }
+
+
+    [HttpGet("filter")]
+    public async Task<IActionResult> FilteronLocation([FromQuery] int location)
+    {
+        var shows = await _context.TheatreShow.Include(x => x.Venue).ToListAsync();
+
+        if (location > 0)
+        {
+            shows = shows.Where(ts => ts.Venue != null && ts.Venue.VenueId == location).ToList();
+        }
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+        };
+
+        return new JsonResult(shows, jsonOptions);
+    }
+
+
 
     [HttpPost("AddShow")]
     public async Task<IActionResult> CreateShow([FromBody] TheatreShow newShow)
