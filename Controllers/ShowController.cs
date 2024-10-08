@@ -135,7 +135,7 @@ public class ShowController : ControllerBase
 
         var jsonOptions = new JsonSerializerOptions
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
         };
 
         return new JsonResult(show, jsonOptions);
