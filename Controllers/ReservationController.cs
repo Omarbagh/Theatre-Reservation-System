@@ -33,6 +33,7 @@ public class ReservationController : ControllerBase
 
             var theatreShowDate = await _context.TheatreShowDate
                 .Include(tsd => tsd.TheatreShow)
+                .ThenInclude(ts => ts.Venue)
                 .FirstOrDefaultAsync(tsd => tsd.TheatreShowDateId == reservationDto.ShowDateId);
 
             if (theatreShowDate == null)
@@ -44,6 +45,23 @@ public class ReservationController : ControllerBase
             if (theatreshow == null)
             {
                 return NotFound($"The theatre show related to show date ID {reservationDto.ShowDateId} was not found.");
+            }
+
+            var venue = theatreshow.Venue;
+            if (venue == null)
+            {
+                return NotFound($"The venue for the theatre show related to show date ID {reservationDto.ShowDateId} was not found.");
+            }
+
+            // Calculate how many tickets have already been reserved for this show date
+            var reservedTickets = await _context.Reservation
+                .Where(r => r.TheatreShowDate.TheatreShowDateId == reservationDto.ShowDateId)
+                .SumAsync(r => r.AmountOfTickets);
+
+            var availableTickets = venue.Capacity - reservedTickets;
+            if (reservationDto.AmountOfTickets > availableTickets)
+            {
+                return BadRequest($"Not enough tickets available. Only {availableTickets} tickets left.");
             }
 
             var priceperticket = theatreshow.Price;
