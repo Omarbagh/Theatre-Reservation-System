@@ -173,11 +173,55 @@ public class ShowController : ControllerBase
 
         var jsonOptions = new JsonSerializerOptions
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
         };
 
         return new JsonResult(shows, jsonOptions);
     }
+
+
+    [HttpGet("filter/date")]
+    public async Task<IActionResult> FilterByDateRange([FromQuery] string date1, [FromQuery] string date2)
+    {
+        if (!DateTime.TryParse(date1, out DateTime startDate) ||
+            !DateTime.TryParse(date2, out DateTime endDate))
+        {
+            return BadRequest("Invalid date format. Please use a valid date format (e.g., yyyy-MM-dd).");
+        }
+
+        if (endDate < startDate)
+        {
+            return BadRequest("The end date must be greater than or equal to the start date.");
+        }
+
+        var venues = await _context.Venue
+            .Include(v => v.TheatreShows)
+                .ThenInclude(ts => ts.theatreShowDates)
+            .ToListAsync();
+
+        var filteredShows = venues.SelectMany(v => v.TheatreShows, (v, ts) => new { Venue = v, TheatreShow = ts })
+            .SelectMany(ts => ts.TheatreShow.theatreShowDates
+                .Where(tsd => tsd.DateAndTime >= startDate && tsd.DateAndTime <= endDate)
+                .Select(tsd => new
+                {
+                    tsd.TheatreShowDateId,
+                    tsd.DateAndTime,
+                    TheatreShowTitle = ts.TheatreShow.Title,
+                    VenueName = ts.Venue.Name
+                }))
+            .ToList();
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+        };
+
+        return new JsonResult(filteredShows, jsonOptions);
+
+    }
+
+
+
 
 
 
