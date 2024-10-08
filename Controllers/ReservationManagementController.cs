@@ -61,6 +61,37 @@ public class ReservationManagementController : ControllerBase
         return Ok(reservations);
     }
 
+    [HttpDelete("DeleteReservation/{id}")]
+    public async Task<IActionResult> DeleteReservation(int id)
+    {
+        var adminCheckResult = IsAdminLoggedIn();
+
+        if (!adminCheckResult)
+        {
+            return Unauthorized("Only admins can Delete reservation(s).");
+        }
+
+        // Find the show by id
+        var reservation = await _context.Reservation.FirstOrDefaultAsync(r => r.ReservationId == id);
+        if (reservation == null)
+        {
+            return NotFound("Reservation not found.");
+        }
+        //lala
+        try
+        {
+            // Remove the reservation
+            _context.Reservation.Remove(reservation);
+
+            await _context.SaveChangesAsync();
+            return Ok("Reservation deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while deleting the show: {ex.Message}");
+        }
+    }
+
     // DTO classes for response
     public class ReservationResponseDto
     {
