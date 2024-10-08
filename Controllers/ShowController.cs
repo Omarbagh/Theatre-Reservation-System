@@ -143,7 +143,7 @@ public class ShowController : ControllerBase
 
 
 
-    [HttpGet("filter")]
+    [HttpGet("filter/title")]
     public async Task<IActionResult> FilteronTitle(string filter)
     {
         var shows = await _context.TheatreShow.ToListAsync();
@@ -161,14 +161,14 @@ public class ShowController : ControllerBase
     }
 
 
-    [HttpGet("filter")]
+    [HttpGet("filter/location")]
     public async Task<IActionResult> FilteronLocation([FromQuery] int location)
     {
-        var shows = await _context.TheatreShow.Include(x => x.Venue).ToListAsync();
+        var shows = await _context.Venue.Include(x => x.TheatreShows).ToListAsync();
 
         if (location > 0)
         {
-            shows = shows.Where(ts => ts.Venue != null && ts.Venue.VenueId == location).ToList();
+            shows = shows.Where(ts => ts.VenueId != null && ts.VenueId == location).ToList();
         }
 
         var jsonOptions = new JsonSerializerOptions
