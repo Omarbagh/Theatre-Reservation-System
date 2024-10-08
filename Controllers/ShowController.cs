@@ -181,25 +181,35 @@ public class ShowController : ControllerBase
 
 
     [HttpGet("filter/date")]
-    public async Task<IActionResult> FilterByDateRange([FromQuery] string date1, [FromQuery] string date2)
+    public async Task<IActionResult> FilterByDateRange(
+    [FromQuery] string date1,
+    [FromQuery] string date2,
+    [FromQuery] string sortBy = "date", // Default sort by date
+    [FromQuery] string sortOrder = "asc" // Default sort order is ascending
+)
     {
+        // Parse the date strings to DateTime
         if (!DateTime.TryParse(date1, out DateTime startDate) ||
             !DateTime.TryParse(date2, out DateTime endDate))
         {
             return BadRequest("Invalid date format. Please use a valid date format (e.g., yyyy-MM-dd).");
         }
 
+        // Ensure the end date is greater than or equal to the start date
         if (endDate < startDate)
         {
             return BadRequest("The end date must be greater than or equal to the start date.");
         }
 
+        // Fetch all venues and their shows
         var venues = await _context.Venue
             .Include(v => v.TheatreShows)
                 .ThenInclude(ts => ts.theatreShowDates)
             .ToListAsync();
 
-        var filteredShows = venues.SelectMany(v => v.TheatreShows, (v, ts) => new { Venue = v, TheatreShow = ts })
+        // Filter shows based on the date range
+        var filteredShows = venues
+            .SelectMany(v => v.TheatreShows, (v, ts) => new { Venue = v, TheatreShow = ts })
             .SelectMany(ts => ts.TheatreShow.theatreShowDates
                 .Where(tsd => tsd.DateAndTime >= startDate && tsd.DateAndTime <= endDate)
                 .Select(tsd => new
@@ -207,17 +217,47 @@ public class ShowController : ControllerBase
                     tsd.TheatreShowDateId,
                     tsd.DateAndTime,
                     TheatreShowTitle = ts.TheatreShow.Title,
-                    VenueName = ts.Venue.Name
+                    VenueName = ts.Venue.Name,
+                    Price = ts.TheatreShow.Price
                 }))
             .ToList();
+
+        if (!filteredShows.Any())
+        {
+            return NotFound("No shows found within the specified date range.");
+        }
+
+        // Sort the filtered shows based on the sortBy and sortOrder parameters
+        IOrderedEnumerable<dynamic> sortedShows;
+
+        switch (sortBy.ToLower())
+        {
+            case "title":
+                sortedShows = sortOrder.ToLower() == "desc"
+                    ? filteredShows.OrderByDescending(show => show.TheatreShowTitle)
+                    : filteredShows.OrderBy(show => show.TheatreShowTitle);
+                break;
+
+            case "price":
+                sortedShows = sortOrder.ToLower() == "desc"
+                    ? filteredShows.OrderByDescending(show => show.Price)
+                    : filteredShows.OrderBy(show => show.Price);
+                break;
+
+            case "date":
+            default:
+                sortedShows = sortOrder.ToLower() == "desc"
+                    ? filteredShows.OrderByDescending(show => show.DateAndTime)
+                    : filteredShows.OrderBy(show => show.DateAndTime);
+                break;
+        }
 
         var jsonOptions = new JsonSerializerOptions
         {
             ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
         };
 
-        return new JsonResult(filteredShows, jsonOptions);
-
+        return new JsonResult(sortedShows.ToList(), jsonOptions);
     }
 
 
