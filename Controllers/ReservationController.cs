@@ -15,14 +15,32 @@ public class ReservationController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateReservation([FromBody] ReservationDto reservationDto)
+    public async Task<IActionResult> CreateReservations([FromBody] List<ReservationDto> reservationDtos)
     {
-        if (ModelState.IsValid)
+        if (reservationDtos == null || reservationDtos.Count == 0)
         {
+            return BadRequest("No reservations provided.");
+        }
+
+        var results = new List<ReservationResponseDto>();
+
+        foreach (var reservationDto in reservationDtos)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var theatreShowDate = await _context.TheatreShowDate.FindAsync(reservationDto.ShowDateId);
             if (theatreShowDate == null)
             {
                 return NotFound($"The show date with ID {reservationDto.ShowDateId} was not found.");
+            }
+
+            var amountoftickets = reservationDto.AmountOfTickets;
+            if (amountoftickets == 0)
+            {
+                return NotFound($"You can not book 0 tickets.");
             }
 
             var customer = new Customer
@@ -62,10 +80,10 @@ public class ReservationController : ControllerBase
                 }
             };
 
-            return CreatedAtAction(nameof(CreateReservation), new { id = reservation.ReservationId }, result);
+            results.Add(result);
         }
 
-        return BadRequest(ModelState);
+        return CreatedAtAction(nameof(CreateReservations), results);
     }
 
     // DTO for creating a reservation
