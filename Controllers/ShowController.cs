@@ -144,7 +144,7 @@ public class ShowController : ControllerBase
 
 
     [HttpGet("filter")]
-    public async Task<IActionResult> Filter(string filter)
+    public async Task<IActionResult> FilteronLocation(string filter)
     {
         // Assuming _context is your database context
         var shows = await _context.TheatreShow.ToListAsync();
