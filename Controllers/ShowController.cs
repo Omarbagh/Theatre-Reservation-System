@@ -120,7 +120,7 @@ public class ShowController : ControllerBase
 
         return Ok(shows);
     }
-    [HttpGet("id/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> FindId(int id)
     {
         var show = await _context.TheatreShow
