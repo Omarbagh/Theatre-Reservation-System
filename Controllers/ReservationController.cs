@@ -41,6 +41,12 @@ public class ReservationController : ControllerBase
                 return NotFound($"The show date with ID {reservationDto.ShowDateId} was not found.");
             }
 
+            // Check if the show date is in the past
+            if (theatreShowDate.DateAndTime < DateTime.Now)
+            {
+                return BadRequest($"The show date with ID {reservationDto.ShowDateId} is in the past.");
+            }
+
             var theatreshow = theatreShowDate.TheatreShow;
             if (theatreshow == null)
             {
