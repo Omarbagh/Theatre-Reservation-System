@@ -31,11 +31,22 @@ public class ReservationController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var theatreShowDate = await _context.TheatreShowDate.FindAsync(reservationDto.ShowDateId);
+            var theatreShowDate = await _context.TheatreShowDate
+                .Include(tsd => tsd.TheatreShow)
+                .FirstOrDefaultAsync(tsd => tsd.TheatreShowDateId == reservationDto.ShowDateId);
+
             if (theatreShowDate == null)
             {
                 return NotFound($"The show date with ID {reservationDto.ShowDateId} was not found.");
             }
+
+            var theatreshow = theatreShowDate.TheatreShow;
+            if (theatreshow == null)
+            {
+                return NotFound($"The theatre show related to show date ID {reservationDto.ShowDateId} was not found.");
+            }
+
+            var priceperticket = theatreshow.Price;
 
             var amountoftickets = reservationDto.AmountOfTickets;
             if (amountoftickets == 0)
@@ -65,6 +76,7 @@ public class ReservationController : ControllerBase
             {
                 ReservationId = reservation.ReservationId,
                 AmountOfTickets = reservation.AmountOfTickets,
+                TotalPrice = priceperticket * reservation.AmountOfTickets,
                 Used = reservation.Used,
                 Customer = new CustomerDto
                 {
@@ -100,6 +112,7 @@ public class ReservationController : ControllerBase
     public class ReservationResponseDto
     {
         public int ReservationId { get; set; }
+        public double TotalPrice { get; set; }
         public int AmountOfTickets { get; set; }
         public bool Used { get; set; }
         public CustomerDto Customer { get; set; }
