@@ -29,6 +29,7 @@ namespace StarterKit
             builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<ShowService>();
 
+            builder.Services.AddScoped<AdminAuthFilter>();
 
             builder.Services.AddDbContext<DatabaseContext>(
                 options => options.UseSqlite(builder.Configuration.GetConnectionString("SqlLiteDb")));
