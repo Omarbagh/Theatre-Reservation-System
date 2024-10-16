@@ -14,6 +14,8 @@ namespace StarterKit.Models
         public DbSet<TheatreShow> TheatreShow { get; set; }
         public DbSet<Venue> Venue { get; set; }
 
+        public DbSet<Snacks> Snacks { get; set; }
+
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
