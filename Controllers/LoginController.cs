@@ -77,6 +77,7 @@ public class LoginController : Controller
     [HttpGet("Logout")]
     public IActionResult Logout()
     {
+        HttpContext.Session.Clear();
         return Ok("Logged out");
     }
 
