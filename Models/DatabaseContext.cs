@@ -16,6 +16,9 @@ namespace StarterKit.Models
 
         public DbSet<Snacks> Snacks { get; set; }
 
+        public DbSet<AdminDashboard> AdminDashboards { get; set; }
+
+
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
