@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 namespace StarterKit.Models
@@ -77,9 +78,22 @@ namespace StarterKit.Models
         public int Price { get; set; }
     }
 
-    public class AdminDashbord
+    public class AdminDashboard
     {
+        [Key]
+        public int ReservationId { get; set; }
+        public int CustomerId { get; set; }
+        public int TheatreShowId { get; set; }
+        public int VenueId { get; set; }
+        public int AmountOfTickets { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? SnacksDetails { get; set; }
+        public DateTime DateAndTime { get; set; }
+        public bool ReservationUsed { get; set; }
 
+        public virtual Customer? Customer { get; set; }
+        public virtual TheatreShow? TheatreShow { get; set; }
+        public virtual Venue? Venue { get; set; }
     }
 
 }
