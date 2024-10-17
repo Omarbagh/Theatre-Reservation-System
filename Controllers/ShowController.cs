@@ -6,6 +6,7 @@ using StarterKit.Models;
 using Microsoft.EntityFrameworkCore;
 
 using System.Text.Json;
+using Services;
 
 
 [Route("api/v1/shows")]
@@ -15,118 +16,33 @@ public class ShowController : ControllerBase
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly DatabaseContext _context;
+    private readonly ShowService _showService;
 
-    public ShowController(IHttpContextAccessor httpContextAccessor, DatabaseContext context)
+    public ShowController(IHttpContextAccessor httpContextAccessor, DatabaseContext context, ShowService showService)
     {
         _httpContextAccessor = httpContextAccessor;
         _context = context;
+        _showService = showService;
     }
     [HttpGet]
     public async Task<IActionResult> GetAllShows()
     {
-        string connectionString = @"Data Source=webdev.sqlite";
-        string query = @"
-            SELECT 
-                ts.TheatreShowId, 
-                ts.Title, 
-                ts.Description, 
-                ts.Price, 
-                v.VenueId, 
-                v.Name as VenueName, 
-                v.Capacity as VenueCapacity,
-                tsd.TheatreShowDateId, 
-                tsd.DateAndTime as ShowDate
-            FROM 
-                TheatreShow ts
-            LEFT JOIN 
-                Venue v ON ts.VenueId = v.VenueId
-            LEFT JOIN 
-                TheatreShowDate tsd ON ts.TheatreShowId = tsd.TheatreShowId
-            ORDER BY 
-                ts.TheatreShowId, tsd.DateAndTime;
-        ";
-
-        List<TheatreShow> shows = new List<TheatreShow>();
-
         try
         {
-            using (var connection = new SqliteConnection(connectionString))
-            {
-                await connection.OpenAsync();
-
-                using (var command = new SqliteCommand(query, connection))
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    // Dictionary to avoid duplicate shows
-                    var showMap = new Dictionary<int, TheatreShow>();
-
-                    while (await reader.ReadAsync())
-                    {
-                        int showId = reader.GetInt32(reader.GetOrdinal("TheatreShowId"));
-
-                        // Checken of de show al in de map zit zo niet maakt die hem aan.
-                        if (!showMap.ContainsKey(showId))
-                        {
-                            var show = new TheatreShow
-                            {
-                                TheatreShowId = showId,
-                                Title = reader.IsDBNull(reader.GetOrdinal("Title")) ? null : reader.GetString(reader.GetOrdinal("Title")),
-                                Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? null : reader.GetString(reader.GetOrdinal("Description")),
-                                Price = reader.GetDouble(reader.GetOrdinal("Price")),
-                                Venue = new Venue
-                                {
-                                    VenueId = reader.GetInt32(reader.GetOrdinal("VenueId")),
-                                    Name = reader.IsDBNull(reader.GetOrdinal("VenueName")) ? null : reader.GetString(reader.GetOrdinal("VenueName")),
-                                    Capacity = reader.GetInt32(reader.GetOrdinal("VenueCapacity"))
-                                },
-                                theatreShowDates = new List<TheatreShowDate>()
-                            };
-
-                            showMap[showId] = show;
-                        }
-
-                        // Add the show date if available
-                        if (!reader.IsDBNull(reader.GetOrdinal("ShowDate")))
-                        {
-                            var showDate = new TheatreShowDate
-                            {
-                                TheatreShowDateId = reader.GetInt32(reader.GetOrdinal("TheatreShowDateId")),
-                                DateAndTime = reader.GetDateTime(reader.GetOrdinal("ShowDate"))
-                            };
-
-                            showMap[showId].theatreShowDates.Add(showDate);
-                        }
-                    }
-
-                    // Convert the dictionary to a list
-                    shows = new List<TheatreShow>(showMap.Values);
-                }
-            }
+            var shows = await _showService.GetShows();
+            return Ok(shows);
         }
         catch (Exception ex)
         {
-            Console.WriteLine("An error occurred: " + ex.Message);
-            return StatusCode(500, "Internal server error.");
+            // Log the exception (e.g., using a logging framework)
+            return StatusCode(500, "Internal server error: " + ex.Message);
         }
-
-
-        // 1.3 Add a parameter that allows you to filter the list of shows by title or description.
-
-
-        if (shows.Count == 0)
-        {
-            return NotFound("No shows available.");
-        }
-
-        return Ok(shows);
     }
-    [HttpGet("id/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> FindId(int id)
     {
-        var show = await _context.TheatreShow
-                                 .Include(s => s.Venue)
-                                 .Include(s => s.theatreShowDates)
-                                 .FirstOrDefaultAsync(s => s.TheatreShowId == id);
+        // Call the service method to get the show by ID
+        var show = await _showService.ShowWithId(id); // Assuming you have injected ShowService
 
         if (show == null)
         {
@@ -135,7 +51,7 @@ public class ShowController : ControllerBase
 
         var jsonOptions = new JsonSerializerOptions
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
         };
 
         return new JsonResult(show, jsonOptions);
@@ -146,29 +62,26 @@ public class ShowController : ControllerBase
     [HttpGet("filter/title")]
     public async Task<IActionResult> FilteronTitle(string filter)
     {
-        var shows = await _context.TheatreShow.ToListAsync();
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            shows = shows
-                .Where(ts =>
-                    (ts.Title != null && ts.Title.Contains(filter, StringComparison.OrdinalIgnoreCase)) ||
-                    (ts.Description != null && ts.Description.Contains(filter, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
-        }
-
+        var shows = await _showService.ShowFilterTitle(filter);
         return Ok(shows);
     }
+
+
 
 
     [HttpGet("filter/location")]
     public async Task<IActionResult> FilteronLocation([FromQuery] int location)
     {
-        var shows = await _context.Venue.Include(x => x.TheatreShows).ToListAsync();
-
-        if (location > 0)
+        if (location <= 0)
         {
-            shows = shows.Where(ts => ts.VenueId != null && ts.VenueId == location).ToList();
+            return BadRequest("Invalid location ID.");
+        }
+
+        var shows = await _showService.ShowFilterLocationAsync(location);
+
+        if (shows == null || shows.Count == 0)
+        {
+            return NotFound($"No shows found for location ID {location}.");
         }
 
         var jsonOptions = new JsonSerializerOptions
@@ -178,6 +91,7 @@ public class ShowController : ControllerBase
 
         return new JsonResult(shows, jsonOptions);
     }
+
 
 
     [HttpGet("filter/date")]
@@ -201,26 +115,8 @@ public class ShowController : ControllerBase
             return BadRequest("The end date must be greater than or equal to the start date.");
         }
 
-        // Fetch all venues and their shows
-        var venues = await _context.Venue
-            .Include(v => v.TheatreShows)
-                .ThenInclude(ts => ts.theatreShowDates)
-            .ToListAsync();
-
-        // Filter shows based on the date range
-        var filteredShows = venues
-            .SelectMany(v => v.TheatreShows, (v, ts) => new { Venue = v, TheatreShow = ts })
-            .SelectMany(ts => ts.TheatreShow.theatreShowDates
-                .Where(tsd => tsd.DateAndTime >= startDate && tsd.DateAndTime <= endDate)
-                .Select(tsd => new
-                {
-                    tsd.TheatreShowDateId,
-                    tsd.DateAndTime,
-                    TheatreShowTitle = ts.TheatreShow.Title,
-                    VenueName = ts.Venue.Name,
-                    Price = ts.TheatreShow.Price
-                }))
-            .ToList();
+        // Call the service to get the filtered shows
+        var filteredShows = await _showService.FilterShowsByDateRangeAsync(startDate, endDate);
 
         if (!filteredShows.Any())
         {
@@ -228,29 +124,7 @@ public class ShowController : ControllerBase
         }
 
         // Sort the filtered shows based on the sortBy and sortOrder parameters
-        IOrderedEnumerable<dynamic> sortedShows;
-
-        switch (sortBy.ToLower())
-        {
-            case "title":
-                sortedShows = sortOrder.ToLower() == "desc"
-                    ? filteredShows.OrderByDescending(show => show.TheatreShowTitle)
-                    : filteredShows.OrderBy(show => show.TheatreShowTitle);
-                break;
-
-            case "price":
-                sortedShows = sortOrder.ToLower() == "desc"
-                    ? filteredShows.OrderByDescending(show => show.Price)
-                    : filteredShows.OrderBy(show => show.Price);
-                break;
-
-            case "date":
-            default:
-                sortedShows = sortOrder.ToLower() == "desc"
-                    ? filteredShows.OrderByDescending(show => show.DateAndTime)
-                    : filteredShows.OrderBy(show => show.DateAndTime);
-                break;
-        }
+        var sortedShows = SortShows(filteredShows, sortBy, sortOrder);
 
         var jsonOptions = new JsonSerializerOptions
         {
@@ -260,155 +134,88 @@ public class ShowController : ControllerBase
         return new JsonResult(sortedShows.ToList(), jsonOptions);
     }
 
+    private static IOrderedEnumerable<dynamic> SortShows(IEnumerable<dynamic> shows, string sortBy, string sortOrder)
+    {
+        IOrderedEnumerable<dynamic> sortedShows;
 
+        switch (sortBy.ToLower())
+        {
+            case "title":
+                sortedShows = sortOrder.ToLower() == "desc"
+                    ? shows.OrderByDescending(show => show.TheatreShowTitle)
+                    : shows.OrderBy(show => show.TheatreShowTitle);
+                break;
 
+            case "price":
+                sortedShows = sortOrder.ToLower() == "desc"
+                    ? shows.OrderByDescending(show => show.Price)
+                    : shows.OrderBy(show => show.Price);
+                break;
 
+            case "date":
+            default:
+                sortedShows = sortOrder.ToLower() == "desc"
+                    ? shows.OrderByDescending(show => show.DateAndTime)
+                    : shows.OrderBy(show => show.DateAndTime);
+                break;
+        }
+
+        return sortedShows;
+    }
 
 
     [HttpPost("AddShow")]
     public async Task<IActionResult> CreateShow([FromBody] TheatreShow newShow)
     {
-        var adminCheckResult = IsAdminLoggedIn();
-
-        if (!adminCheckResult)
+        if (!IsAdminLoggedIn())
         {
             return Unauthorized("Only admins can create new shows.");
         }
 
-        try
+        var result = await _showService.CreateShowAsync(newShow);
+
+        if (result == "Venue not found.")
         {
-            // Detach the venue if it exists to avoid re-inserting it
-            var existingVenue = await _context.Venue.FindAsync(newShow.Venue.VenueId);
-
-            if (existingVenue == null)
-            {
-                return NotFound("Venue not found.");
-            }
-
-            // Assign the existing venue to the new show
-            newShow.Venue = existingVenue;
-
-            _context.TheatreShow.Add(newShow);
-            await _context.SaveChangesAsync();
-            return Ok("Show created successfully");
+            return NotFound(result);
         }
-        catch (Exception ex)
-        {
-            return StatusCode(500, "An error occurred while creating the show: " + ex.Message);
-        }
+
+        return Ok(result);
     }
+
     [HttpPut("UpdateShow/{id}")]
     public async Task<IActionResult> UpdateShow(int id, [FromBody] TheatreShow show)
     {
-        var adminCheckResult = IsAdminLoggedIn();
-
-        if (!adminCheckResult)
+        if (!IsAdminLoggedIn())
         {
             return Unauthorized("Only admins can update shows.");
         }
 
-        // Find the existing show by id
-        var oldShow = await _context.TheatreShow.Include(s => s.theatreShowDates)
-                                                .Include(s => s.Venue)
-                                                .FirstOrDefaultAsync(s => s.TheatreShowId == id);
+        var result = await _showService.UpdateShowAsync(id, show);
 
-        if (oldShow == null)
+        if (result == "Show not found.")
         {
-            return NotFound("Show not found.");
+            return NotFound(result);
         }
 
-        try
-        {
-            // Only update fields if they have valid values in the incoming request
-
-            if (!string.IsNullOrEmpty(show.Title))
-            {
-                oldShow.Title = show.Title;
-            }
-
-            if (!string.IsNullOrEmpty(show.Description))
-            {
-                oldShow.Description = show.Description;
-            }
-
-            if (show.Price > 0)
-            {
-                oldShow.Price = show.Price;
-            }
-
-            // Update venue if provided and valid
-            if (show.Venue != null && oldShow.Venue.VenueId != show.Venue.VenueId)
-            {
-                var newVenue = await _context.Venue.FindAsync(show.Venue.VenueId);
-                if (newVenue == null)
-                {
-                    return NotFound("Venue not found.");
-                }
-                oldShow.Venue = newVenue;
-            }
-
-            // Update TheatreShowDates if provided
-            if (show.theatreShowDates != null && show.theatreShowDates.Any())
-            {
-                _context.TheatreShowDate.RemoveRange(oldShow.theatreShowDates);
-
-                foreach (var date in show.theatreShowDates)
-                {
-                    oldShow.theatreShowDates.Add(new TheatreShowDate
-                    {
-                        DateAndTime = date.DateAndTime
-                    });
-                }
-            }
-
-            // Save changes
-            _context.TheatreShow.Update(oldShow);
-            await _context.SaveChangesAsync();
-
-            return Ok("Show updated successfully.");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"An error occurred while updating the show: {ex.Message}");
-        }
+        return Ok(result);
     }
-
-
 
     [HttpDelete("DeleteShow/{id}")]
     public async Task<IActionResult> DeleteShow(int id)
     {
-        var adminCheckResult = IsAdminLoggedIn();
-
-        if (!adminCheckResult)
+        if (!IsAdminLoggedIn())
         {
-            return Unauthorized("Only admins can create new shows.");
+            return Unauthorized("Only admins can delete shows.");
         }
 
-        // Find the show by id
-        var show = await _context.TheatreShow.Include(s => s.theatreShowDates).FirstOrDefaultAsync(s => s.TheatreShowId == id);
+        var result = await _showService.DeleteShowAsync(id);
 
-        if (show == null)
+        if (result == "Show not found.")
         {
-            return NotFound("Show not found.");
+            return NotFound(result);
         }
-        //lala
-        try
-        {
-            // Remove the associated TheatreShowDates first
-            _context.TheatreShowDate.RemoveRange(show.theatreShowDates);
 
-            // Then remove the show
-            _context.TheatreShow.Remove(show);
-
-            // Save changes to the database
-            await _context.SaveChangesAsync();
-            return Ok("Show deleted successfully.");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"An error occurred while deleting the show: {ex.Message}");
-        }
+        return Ok(result);
     }
 
     private bool IsAdminLoggedIn()

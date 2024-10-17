@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Services;
 using StarterKit.Models;
 using StarterKit.Services;
 
@@ -14,6 +15,8 @@ namespace StarterKit
 
             builder.Services.AddDistributedMemoryCache();
 
+
+
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromSeconds(200);
@@ -24,6 +27,9 @@ namespace StarterKit
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddScoped<ILoginService, LoginService>();
+            builder.Services.AddScoped<ShowService>();
+
+            builder.Services.AddScoped<AdminAuthFilter>();
 
             builder.Services.AddDbContext<DatabaseContext>(
                 options => options.UseSqlite(builder.Configuration.GetConnectionString("SqlLiteDb")));
