@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using StarterKit.Models;
-using Microsoft.EntityFrameworkCore;
+using Services;
 using System.Threading.Tasks;
 
 namespace StarterKit.Controllers
@@ -9,18 +9,18 @@ namespace StarterKit.Controllers
     [Route("api/v1/snacks")]
     public class SnackController : ControllerBase
     {
-        private readonly DatabaseContext _context;
+        private readonly SnackService _snackService;
 
-        public SnackController(DatabaseContext context)
+        public SnackController(SnackService snackService)
         {
-            _context = context;
+            _snackService = snackService;
         }
 
-        // GET: api/v1/reservation/snacks
+        // GET: api/v1/snacks
         [HttpGet]
         public async Task<IActionResult> GetSnacks()
         {
-            var snacks = await _context.Snacks.ToListAsync();
+            var snacks = await _snackService.GetAllSnacksAsync();
             if (snacks.Count == 0)
             {
                 return NoContent();
@@ -28,76 +28,68 @@ namespace StarterKit.Controllers
             return Ok(snacks);
         }
 
-        // GET: api/v1/reservation/snacks/{id}
+        // GET: api/v1/snacks/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSnackById(int id)
         {
-            var snack = await _context.Snacks.FindAsync(id);
+            var snack = await _snackService.GetSnackByIdAsync(id);
             if (snack == null)
+            {
                 return NotFound();
-
+            }
             return Ok(snack);
         }
 
-        // POST: api/v1/reservation/snacks
+        // POST: api/v1/snacks
         [HttpPost]
         [ServiceFilter(typeof(AdminAuthFilter))]
-        public async Task<IActionResult> CreateSnackReservation([FromBody] Snacks snack)
+        public async Task<IActionResult> CreateSnack([FromBody] Snacks snack)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existingSnack = await _context.Snacks.FindAsync(snack.SnacksId);
-            if (existingSnack != null)
             {
-                return Conflict($"A snack with ID {snack.SnacksId} already exists.");
+                return BadRequest(ModelState);
             }
-            // Check if snack capacity allows the reservation
-            if (snack.Amount > snack.Capacity)
-                return BadRequest("Requested amount exceeds the snack's capacity.");
 
-            _context.Snacks.Add(snack);
-            await _context.SaveChangesAsync();
+            var result = await _snackService.CreateSnackAsync(snack);
+            if (result.Contains("exists") || result.Contains("capacity"))
+            {
+                return BadRequest(result);
+            }
 
             return CreatedAtAction(nameof(GetSnackById), new { id = snack.SnacksId }, snack);
         }
 
-        // PUT: api/v1/reservation/snacks/{id}
+        // PUT: api/v1/snacks/{id}
         [HttpPut("{id}")]
         [ServiceFilter(typeof(AdminAuthFilter))]
         public async Task<IActionResult> UpdateSnack(int id, [FromBody] Snacks updatedSnack)
         {
             if (id != updatedSnack.SnacksId)
+            {
                 return BadRequest("Snack ID mismatch.");
+            }
 
-            var snack = await _context.Snacks.FindAsync(id);
-            if (snack == null)
-                return NotFound();
+            var result = await _snackService.UpdateSnackAsync(id, updatedSnack);
+            if (result == "Snack not found.")
+            {
+                return NotFound(result);
+            }
 
-            // Update snack properties
-            snack.Name = updatedSnack.Name;
-            snack.Capacity = updatedSnack.Capacity;
-            snack.Amount = updatedSnack.Amount;
-            snack.Price = updatedSnack.Price;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(snack);
+            return Ok(result);
         }
 
-        // DELETE: api/v1/reservation/snacks/{id}
+        // DELETE: api/v1/snacks/{id}
         [HttpDelete("{id}")]
-        // [ServiceFilter(typeof(AdminAuthFilter))]
+        [ServiceFilter(typeof(AdminAuthFilter))]
         public async Task<IActionResult> DeleteSnack(int id)
         {
-            var snack = await _context.Snacks.FindAsync(id);
-            if (snack == null)
-                return NotFound();
+            var result = await _snackService.DeleteSnackAsync(id);
+            if (result.Contains("not found"))
+            {
+                return NotFound(result);
+            }
 
-            _context.Snacks.Remove(snack);
-            await _context.SaveChangesAsync();
-
-            return Ok($"Snack with id {snack.SnacksId} deleted successfully.");
+            return Ok(result);
         }
     }
 }
