@@ -19,15 +19,15 @@ namespace StarterKit.Models
     public class Reservation
     {
         public int ReservationId { get; set; }
-
         public int AmountOfTickets { get; set; }
-
         public bool Used { get; set; }
 
-        public Customer? Customer { get; set; }
-
-        public TheatreShowDate? TheatreShowDate { get; set; }
+        public int CustomerId { get; set; }
+        public int TheatreShowDateId { get; set; }
+        public virtual Customer Customer { get; set; }
+        public virtual TheatreShowDate TheatreShowDate { get; set; }
     }
+
 
     public class TheatreShowDate
     {
