@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
-using StarterKit.Models;
 using Microsoft.EntityFrameworkCore;
+using StarterKit.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
-using System.Text.Json;
-
-public class AdminDashbordController : ControllerBase
+[Route("admindashboard")]
+[ApiController]
+public class AdminDashboardController : ControllerBase
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly DatabaseContext _context;
 
-    public AdminDashbordController(IHttpContextAccessor httpContextAccessor, DatabaseContext context)
+    public AdminDashboardController(DatabaseContext context)
     {
-        _httpContextAccessor = httpContextAccessor;
         _context = context;
     }
 
@@ -20,7 +19,6 @@ public class AdminDashbordController : ControllerBase
     public async Task<IActionResult> GetAllData()
     {
         var adminData = await _context.AdminDashboards
-            .Include(ad => ad.ReservationId)
             .Include(ad => ad.Customer)
             .Include(ad => ad.TheatreShow)
             .Include(ad => ad.Venue)
@@ -39,9 +37,6 @@ public class AdminDashbordController : ControllerBase
             SnacksDetails = ad.SnacksDetails
         });
 
-        return Ok(result);
+        return new JsonResult(result);
     }
-
-
-
 }
