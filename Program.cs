@@ -30,6 +30,7 @@ namespace StarterKit
 
             builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<ShowService>();
+            builder.Services.AddScoped<SnackService>();
 
             builder.Services.AddScoped<AdminAuthFilter>();
 
