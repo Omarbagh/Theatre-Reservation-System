@@ -195,9 +195,35 @@ namespace Services
                 return "Show not found.";
             }
 
-            // Update the fields similarly to the original logic
-            // Update the Venue, Dates, etc., and save changes
+            // Update the Title, Description adn the Price
+            oldShow.Title = updatedShow.Title;
+            oldShow.Description = updatedShow.Description;
+            oldShow.Price = updatedShow.Price;
 
+            // Update the venue
+            if (oldShow.Venue.VenueId != updatedShow.Venue.VenueId)
+            {
+                var existingVenue = await _context.Venue.FindAsync(updatedShow.Venue.VenueId);
+                if (existingVenue != null)
+                {
+                    oldShow.Venue = existingVenue;
+                }
+                else
+                {
+                    return "Venue not found.";
+                }
+            }
+
+            // Update theatre show dates
+            oldShow.theatreShowDates.Clear();
+
+            foreach (var date in updatedShow.theatreShowDates)
+            {
+                oldShow.theatreShowDates.Add(new TheatreShowDate
+                {
+                    DateAndTime = date.DateAndTime
+                });
+            }
             await _context.SaveChangesAsync();
             return "Show updated successfully.";
         }
