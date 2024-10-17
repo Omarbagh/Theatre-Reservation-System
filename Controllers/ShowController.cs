@@ -165,12 +165,10 @@ public class ShowController : ControllerBase
 
 
     [HttpPost("AddShow")]
+    [ServiceFilter(typeof(AdminAuthFilter))]
+
     public async Task<IActionResult> CreateShow([FromBody] TheatreShow newShow)
     {
-        if (!IsAdminLoggedIn())
-        {
-            return Unauthorized("Only admins can create new shows.");
-        }
 
         var result = await _showService.CreateShowAsync(newShow);
 
@@ -183,13 +181,9 @@ public class ShowController : ControllerBase
     }
 
     [HttpPut("UpdateShow/{id}")]
+    [ServiceFilter(typeof(AdminAuthFilter))]
     public async Task<IActionResult> UpdateShow(int id, [FromBody] TheatreShow show)
     {
-        if (!IsAdminLoggedIn())
-        {
-            return Unauthorized("Only admins can update shows.");
-        }
-
         var result = await _showService.UpdateShowAsync(id, show);
 
         if (result == "Show not found.")
@@ -201,12 +195,9 @@ public class ShowController : ControllerBase
     }
 
     [HttpDelete("DeleteShow/{id}")]
+    [ServiceFilter(typeof(AdminAuthFilter))]
     public async Task<IActionResult> DeleteShow(int id)
     {
-        if (!IsAdminLoggedIn())
-        {
-            return Unauthorized("Only admins can delete shows.");
-        }
 
         var result = await _showService.DeleteShowAsync(id);
 
@@ -217,23 +208,4 @@ public class ShowController : ControllerBase
 
         return Ok(result);
     }
-
-    private bool IsAdminLoggedIn()
-    {
-        var username = _httpContextAccessor.HttpContext?.Session.GetString("Username");
-
-        if (string.IsNullOrEmpty(username))
-        {
-            return false;
-        }
-
-        var admin = _context.Admin
-            .Where(a => a.UserName == username)
-            .Select(a => a.UserName)
-            .FirstOrDefault();
-
-        return admin != null;
-    }
-
-
 }
