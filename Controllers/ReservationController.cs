@@ -19,7 +19,11 @@ public class ReservationController : ControllerBase
     {
         if (ModelState.IsValid)
         {
-            var theatreShowDate = await _context.TheatreShowDate.FindAsync(reservationDto.ShowDateId);
+            var theatreShowDate = await _context.TheatreShowDate
+                .Include(ts => ts.TheatreShow)
+                    .ThenInclude(t => t.Venue)
+                .FirstOrDefaultAsync(ts => ts.TheatreShowDateId == reservationDto.ShowDateId);
+
             if (theatreShowDate == null)
             {
                 return NotFound($"The show date with ID {reservationDto.ShowDateId} was not found.");
@@ -32,41 +36,67 @@ public class ReservationController : ControllerBase
                 Email = reservationDto.Email
             };
 
+            _context.Customer.Add(customer);
+            await _context.SaveChangesAsync();
+
             var reservation = new Reservation
             {
                 AmountOfTickets = reservationDto.AmountOfTickets,
                 Used = false,
-                Customer = customer,
-                TheatreShowDate = theatreShowDate
+                CustomerId = customer.CustomerId,
+                TheatreShowDateId = theatreShowDate.TheatreShowDateId
             };
 
-            _context.Reservation.Add(reservation);
-            await _context.SaveChangesAsync();
-
-            var result = new ReservationResponseDto
+            if (theatreShowDate.TheatreShow.Venue != null)
             {
-                ReservationId = reservation.ReservationId,
-                AmountOfTickets = reservation.AmountOfTickets,
-                Used = reservation.Used,
-                Customer = new CustomerDto
+                var adminDashboardEntry = new AdminDashboard
                 {
-                    CustomerId = reservation.Customer.CustomerId,
-                    FirstName = reservation.Customer.FirstName,
-                    LastName = reservation.Customer.LastName,
-                    Email = reservation.Customer.Email
-                },
-                TheatreShowDate = new TheatreShowDateDto
-                {
-                    TheatreShowDateId = reservation.TheatreShowDate.TheatreShowDateId,
-                    DateAndTime = reservation.TheatreShowDate.DateAndTime
-                }
-            };
+                    CustomerId = customer.CustomerId,
+                    TheatreShowId = theatreShowDate.TheatreShow.TheatreShowId,
+                    VenueId = theatreShowDate.TheatreShow.Venue.VenueId,
+                    AmountOfTickets = reservation.AmountOfTickets,
+                    TotalPrice = reservation.AmountOfTickets * (decimal)theatreShowDate.TheatreShow.Price,
+                    SnacksDetails = "N/A",
+                    DateAndTime = DateTime.UtcNow,
+                    ReservationUsed = false
+                };
 
-            return CreatedAtAction(nameof(CreateReservation), new { id = reservation.ReservationId }, result);
+                _context.AdminDashboards.Add(adminDashboardEntry);
+                _context.Reservation.Add(reservation);
+
+                await _context.SaveChangesAsync();
+
+                var result = new ReservationResponseDto
+                {
+                    ReservationId = reservation.ReservationId,
+                    AmountOfTickets = reservation.AmountOfTickets,
+                    Used = reservation.Used,
+                    Customer = new CustomerDto
+                    {
+                        CustomerId = customer.CustomerId,
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email
+                    },
+                    TheatreShowDate = new TheatreShowDateDto
+                    {
+                        TheatreShowDateId = reservation.TheatreShowDate.TheatreShow.TheatreShowId,
+                        DateAndTime = reservation.TheatreShowDate.DateAndTime
+                    }
+                };
+
+                return CreatedAtAction(nameof(CreateReservation), new { id = reservation.ReservationId }, result);
+            }
+            else
+            {
+                return NotFound("The associated venue for the theatre show was not found.");
+            }
         }
 
         return BadRequest(ModelState);
     }
+
+
 
     // DTO for creating a reservation
     public class ReservationDto
