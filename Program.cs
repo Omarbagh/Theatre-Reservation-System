@@ -11,6 +11,8 @@ namespace StarterKit
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Logging.AddConsole();
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDistributedMemoryCache();
@@ -53,6 +55,8 @@ namespace StarterKit
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseMiddleware<JsonContentMiddleware>();
 
             app.UseSession();
 
