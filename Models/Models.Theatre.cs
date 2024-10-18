@@ -78,6 +78,20 @@ namespace StarterKit.Models
         public int Price { get; set; }
     }
 
+    public class ReservationSnack
+    {
+        public int ReservationSnackId { get; set; } // Primary Key
+        public int ReservationId { get; set; } // Foreign Key to Reservation
+        public Reservation Reservation { get; set; } // Navigation property to Reservation
+
+        public int SnacksId { get; set; } // Foreign Key to Snacks
+        public Snacks Snack { get; set; } // Navigation property to Snacks
+
+        public int Amount { get; set; } // Amount ordered
+        public int TotalPrice { get; set; } // Total price for all snacks (Amount * Snack Price)
+    }
+
+
     public class AdminDashboard
     {
         [Key]
