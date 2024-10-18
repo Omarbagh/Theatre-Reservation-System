@@ -91,6 +91,7 @@ namespace StarterKit.Controllers
             {
                 query = query.Where(r => r.ReservationId == reservationId.Value);
             }
+            // ...
 
             var reservations = await query
                 .ToListAsync();
