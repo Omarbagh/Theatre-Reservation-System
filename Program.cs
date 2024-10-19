@@ -58,6 +58,8 @@ namespace StarterKit
             app.UseAuthorization();
 
             app.UseMiddleware<JsonContentMiddleware>();
+            app.UseMiddleware<RequestLoggingMiddleware>();
+
 
             app.UseSession();
 
