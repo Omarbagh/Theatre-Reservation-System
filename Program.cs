@@ -32,6 +32,7 @@ namespace StarterKit
             builder.Services.AddScoped<ShowService>();
             builder.Services.AddScoped<SnackService>();
             builder.Services.AddScoped<SnackReservationService>();
+            builder.Services.AddScoped<ReservationManagementService>();
             builder.Services.AddScoped<AdminAuthFilter>();
             builder.Services.AddScoped<IReservationService, ReservationService>();
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
