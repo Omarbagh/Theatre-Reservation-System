@@ -4,44 +4,72 @@ using StarterKit.Models;
 using Microsoft.EntityFrameworkCore;
 
 using System.Text.Json;
-
-public class AdminDashbordController : ControllerBase
+namespace StarterKit.Controllers
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly DatabaseContext _context;
-
-    public AdminDashbordController(IHttpContextAccessor httpContextAccessor, DatabaseContext context)
+    [ApiController]
+    [Route("api/v1/admindashbord")]
+    public class AdminDashbordController : ControllerBase
     {
-        _httpContextAccessor = httpContextAccessor;
-        _context = context;
-    }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllData()
-    {
-        var adminData = await _context.AdminDashboards
-            .Include(ad => ad.ReservationId)
-            .Include(ad => ad.Customer)
-            .Include(ad => ad.TheatreShow)
-            .Include(ad => ad.Venue)
-            .ToListAsync();
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly DatabaseContext _context;
 
-        var result = adminData.Select(ad => new
+        public AdminDashbordController(IHttpContextAccessor httpContextAccessor, DatabaseContext context)
         {
-            ad.ReservationId,
-            CustomerName = $"{ad.Customer?.FirstName} {ad.Customer?.LastName}",
-            ad.AmountOfTickets,
-            ad.TotalPrice,
-            ShowTitle = ad.TheatreShow?.Title,
-            VenueName = ad.Venue?.Name,
-            DateAndTime = ad.DateAndTime,
-            ad.ReservationUsed,
-            SnacksDetails = ad.SnacksDetails
-        });
+            _httpContextAccessor = httpContextAccessor;
+            _context = context;
+        }
 
-        return Ok(result);
+        [HttpGet]
+        public async Task<IActionResult> GetAllData()
+        {
+            var adminData = await _context.AdminDashboards
+                .Select(ad => new
+                {
+                    ad.ReservationId,
+                    ad.CustomerId,
+                    ad.TheatreShowId,
+                    ad.VenueId,
+                    ad.AmountOfTickets,
+                    ad.TotalPrice,
+                    ad.SnacksDetails,
+                    ad.DateAndTime,
+                    ad.ReservationUsed
+                })
+                .ToListAsync();
+
+            return Ok(adminData);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAdminDSById(int id)
+        {
+            var adminds = await _context.AdminDashboards
+                .Where(ad => ad.ReservationId == id)
+                .Select(ad => new
+                {
+                    ad.ReservationId,
+                    ad.CustomerId,
+                    ad.TheatreShowId,
+                    ad.VenueId,
+                    ad.AmountOfTickets,
+                    ad.TotalPrice,
+                    ad.SnacksDetails,
+                    ad.DateAndTime,
+                    ad.ReservationUsed
+                })
+                .FirstOrDefaultAsync();
+
+            if (adminds == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(adminds);
+        }
+
+
+
     }
-
-
-
 }
+
