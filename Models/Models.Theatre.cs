@@ -105,9 +105,8 @@ namespace StarterKit.Models
         public DateTime DateAndTime { get; set; }
         public bool ReservationUsed { get; set; }
 
-        public virtual Customer? Customer { get; set; }
-        public virtual TheatreShow? TheatreShow { get; set; }
-        public virtual Venue? Venue { get; set; }
     }
+
+
 
 }
