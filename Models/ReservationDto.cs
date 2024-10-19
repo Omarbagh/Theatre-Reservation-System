@@ -20,6 +20,7 @@ public class TheatreShowDateDto
 {
     public int TheatreShowDateId { get; set; }
     public DateTime DateAndTime { get; set; }
+    public TheatreShowDto TheatreShow { get; set; }
 }
 
 public class CustomerDto
@@ -28,4 +29,11 @@ public class CustomerDto
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }
+}
+public class TheatreShowDto
+{
+    public int TheatreShowId { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public decimal Price { get; set; }
 }
