@@ -33,6 +33,9 @@ namespace StarterKit
             builder.Services.AddScoped<SnackService>();
             builder.Services.AddScoped<SnackReservationService>();
             builder.Services.AddScoped<AdminAuthFilter>();
+            builder.Services.AddScoped<IReservationService, ReservationService>();
+            builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
 
             builder.Services.AddDbContext<DatabaseContext>(
                 options => options.UseSqlite(builder.Configuration.GetConnectionString("SqlLiteDb")));
