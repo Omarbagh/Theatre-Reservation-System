@@ -122,6 +122,12 @@ namespace Services
             }
 
             reservation.Used = true; // Markeert de reservering als gebruikt.
+            var adminDashboard = await _context.AdminDashboards
+                    .FirstOrDefaultAsync(ad => ad.ReservationId == id); // Zoekt het dashboard van de admin op basis van reserverings-ID.
+            if (adminDashboard != null)
+            {
+                adminDashboard.ReservationUsed = true;
+            }
             await _context.SaveChangesAsync(); // Slaat de wijzigingen op in de database.
 
             return $"Reservation with ID {id} has been marked as used."; // Geeft een succesmelding terug.
