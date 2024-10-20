@@ -1,42 +1,72 @@
+// Importeert de benodigde namespaces voor ASP.NET Core MVC en asynchrone taken.
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
+// Definieert de route voor de API-controller. Deze controller handelt reserveringsverzoeken af.
 [Route("api/v1/Reservation")]
 [ApiController]
 public class ReservationController : ControllerBase
 {
+    // Definieert een privé variabele die de reserveringsservice opslaat.
+    // Deze service wordt gebruikt om reserveringen te maken.
     private readonly IReservationService _reservationService;
 
+    // Constructor van de ReservationController klasse.
+    // De constructor neemt een IReservationService als parameter en wijst deze toe aan de privé variabele.
     public ReservationController(IReservationService reservationService)
     {
         _reservationService = reservationService;
     }
 
-    [HttpPost] // HTTP POST om een nieuwe reservering te creëren.
-    public async Task<IActionResult> CreateReservation([FromBody] ReservationDto reservationDto)
+
+    //     {
+    //     "reservation": {
+    //         "ShowDateId": 1,
+    //         "FirstName": "John",
+    //         "LastName": "Doe",
+    //         "Email": "john.doe@example.com",
+    //         "AmountOfTickets": 3
+    //     },
+    //     "snackOrders": [
+    //         {
+    //             "id": 1,
+    //             "amount": 2
+    //         },
+    //         {
+    //             "id": 3,
+    //             "amount": 1
+    //         }
+    //     ]
+    // }  DIT INVULLEN BIJ JSON VOOR AANMAKEN RESERVATION
+
+
+    // HTTP POST methode voor het creëren van een nieuwe reservering.
+    // De methode accepteert een ReservationRequestDto als JSON in de body van de aanvraag.
+    [HttpPost]
+    public async Task<IActionResult> CreateReservation([FromBody] ReservationRequestDto requestDto)
     {
-        // ModelState bevat informatie over de status van de gegevens die naar de server zijn verzonden.
-        // Het controleert of de gegevens geldig zijn volgens de validatieregels van het model. 
-        // Als het model ongeldig is, kan de controller een foutmelding teruggeven aan de client.
-        // Controleer of het model geldig is; als dit niet het geval is, geef een Bad Request terug met modelstatus.
+        // Controleert of het model geldig is; retourneert BadRequest als dat niet het geval is.
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); // Geeft een 400 Bad Request terug met de modelstatus.
+            return BadRequest(ModelState);
         }
 
         try
         {
-            // Roep de service aan om de reservering aan te maken.
-            var result = await _reservationService.CreateReservationAsync(reservationDto);
-            return CreatedAtAction(nameof(CreateReservation), new { id = result.ReservationId }, result); // Geeft een 201 Created terug met de locatie van de nieuwe reservering.
+            // Roept de CreateReservationAsync methode van de reserveringsservice aan
+            // en geeft zowel de reservering als de snackbestellingen door.
+            var result = await _reservationService.CreateReservationAsync(requestDto.Reservation, requestDto.SnackOrders);
+            // Retourneert een CreatedAtAction met de details van de nieuwe reservering.
+            return CreatedAtAction(nameof(CreateReservation), new { id = result.ReservationId }, result);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(ex.Message); // Geeft een 404 Not Found terug als een sleutel niet is gevonden.
+            // Retourneert een NotFound status als een gevraagde resource niet is gevonden.
+            return NotFound(ex.Message);
         }
         catch
         {
-            // Vang elke andere uitzondering op en geef een 500 Internal Server Error terug.
+            // Retourneert een interne serverfoutstatus als er een andere fout optreedt.
             return StatusCode(500, "An error occurred while processing your request.");
         }
     }

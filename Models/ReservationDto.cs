@@ -7,6 +7,13 @@ public class ReservationDto
     public int AmountOfTickets { get; set; }
 }
 
+public class ReservationRequestDto
+{
+    public ReservationDto Reservation { get; set; }
+    public List<SnackOrder> SnackOrders { get; set; }
+}
+
+
 public class ReservationResponseDto
 {
     public int ReservationId { get; set; }
