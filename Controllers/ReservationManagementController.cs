@@ -29,7 +29,6 @@ namespace StarterKit.Controllers
         }
 
         // Endpoint: GET http://localhost:5097/api/v1/admin/reservations/search?email={email}
-        // Endpoint: GET http://localhost:5097/api/v1/admin/reservations/search?reservationId={reservationId}
         // Endpoint: GET http://localhost:5097/api/v1/admin/reservations/search?email={email}&reservationId={reservationId}
         [HttpGet("search")] // HTTP GET om reserveringen te zoeken op e-mail of reserverings-ID.
         public async Task<IActionResult> SearchReservations([FromQuery] string email, [FromQuery] int? reservationId)
