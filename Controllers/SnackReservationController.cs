@@ -15,6 +15,7 @@ namespace StarterKit.Controllers
         {
             _snackService = snackService;
         }
+        [ServiceFilter(typeof(AdminAuthFilter))] // Voert een filter uit om te garanderen dat alleen admins toegang hebben tot deze endpoints.
         [HttpGet] // HTTP GET om alle snacks op te halen.
         public async Task<IActionResult> Getsnacks()
         {
