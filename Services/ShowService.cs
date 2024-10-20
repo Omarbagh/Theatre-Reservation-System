@@ -24,9 +24,11 @@ namespace Services
         {
             _context = context;
         }
+
+        // Methode om een lijst met alle shows op te halen, inclusief locatie en datums.
         public async Task<List<TheatreShow>> GetShows()
         {
-            string connectionString = @"Data Source=webdev.sqlite";
+            string connectionString = @"Data Source=webdev.sqlite"; // SQLite-verbinding.
             string query = @"
             SELECT 
                 ts.TheatreShowId, 
@@ -48,24 +50,23 @@ namespace Services
                 ts.TheatreShowId, tsd.DateAndTime;
         ";
 
-            List<TheatreShow> shows = new List<TheatreShow>();
+            List<TheatreShow> shows = new List<TheatreShow>(); // Lijst van shows.
 
 
-            using (var connection = new SqliteConnection(connectionString))
+            using (var connection = new SqliteConnection(connectionString)) // Maakt verbinding met de SQLite database.
             {
                 await connection.OpenAsync();
 
-                using (var command = new SqliteCommand(query, connection))
-                using (var reader = await command.ExecuteReaderAsync())
+                using (var command = new SqliteCommand(query, connection)) // Voert SQL-query uit.
+                using (var reader = await command.ExecuteReaderAsync()) // Leest de resultaten van de query.
                 {
-                    // Dictionary to avoid duplicate shows
-                    var showMap = new Dictionary<int, TheatreShow>();
+                    var showMap = new Dictionary<int, TheatreShow>(); // Dictionary om dubbele shows te vermijden.
 
-                    while (await reader.ReadAsync())
+                    while (await reader.ReadAsync()) // Loopt door de query resultaten.
                     {
                         int showId = reader.GetInt32(reader.GetOrdinal("TheatreShowId"));
 
-                        // Checken of de show al in de map zit zo niet maakt die hem aan.
+                        // Controleert of de show al in de dictionary staat, anders maakt het een nieuwe aan.
                         if (!showMap.ContainsKey(showId))
                         {
                             var show = new TheatreShow
@@ -86,7 +87,7 @@ namespace Services
                             showMap[showId] = show;
                         }
 
-                        // Add the show date if available
+                        // Voeg showdatum toe als deze beschikbaar is.
                         if (!reader.IsDBNull(reader.GetOrdinal("ShowDate")))
                         {
                             var showDate = new TheatreShowDate
@@ -95,65 +96,71 @@ namespace Services
                                 DateAndTime = reader.GetDateTime(reader.GetOrdinal("ShowDate"))
                             };
 
-                            showMap[showId].theatreShowDates.Add(showDate);
+                            showMap[showId].theatreShowDates.Add(showDate); // Voegt de datum toe aan de show.
                         }
                     }
 
-                    // Convert the dictionary to a list
-                    shows = new List<TheatreShow>(showMap.Values);
+                    shows = new List<TheatreShow>(showMap.Values); // Converteert de dictionary naar een lijst.
                     return shows;
                 }
             }
 
 
         }
+
+        // Methode om een show op te halen op basis van het ID.
         public async Task<TheatreShow> ShowWithId(int id)
         {
             var show = await _context.TheatreShow
-                                .Include(s => s.Venue)
-                                .Include(s => s.theatreShowDates)
+                                .Include(s => s.Venue) // Inclusief gerelateerde locatie.
+                                .Include(s => s.theatreShowDates) // Inclusief gerelateerde showdatums.
                                 .FirstOrDefaultAsync(s => s.TheatreShowId == id);
             return show;
         }
 
+        // Methode om shows te filteren op basis van titel of beschrijving.
         public async Task<List<TheatreShow>> ShowFilterTitle(string filter)
         {
-            var query = _context.TheatreShow.AsQueryable();
+            var query = _context.TheatreShow.AsQueryable(); // Maakt een query object.
 
             if (!string.IsNullOrEmpty(filter))
             {
-                filter = filter.ToLower(); // Convert the filter to lowercase
+                filter = filter.ToLower(); // Zet filter om naar kleine letters.
 
                 query = query.Where(ts =>
-                    (ts.Title != null && ts.Title.ToLower().Contains(filter)) || // Compare lowercase strings
-                    (ts.Description != null && ts.Description.ToLower().Contains(filter))); // Compare lowercase strings
+                    (ts.Title != null && ts.Title.ToLower().Contains(filter)) ||
+                    (ts.Description != null && ts.Description.ToLower().Contains(filter))); // Vergelijkt strings in kleine letters.
             }
 
-            return await query.ToListAsync();
+            return await query.ToListAsync(); // Voert de query uit en retourneert de resultaten.
         }
+
+        // Methode om shows te filteren op basis van locatie (venue).
         public async Task<List<TheatreShow>> ShowFilterLocationAsync(int location)
         {
             var shows = await _context.TheatreShow
-                                      .Include(ts => ts.Venue)
-                                      .Where(ts => ts.Venue.VenueId == location)
+                                      .Include(ts => ts.Venue) // Inclusief gerelateerde locatie.
+                                      .Where(ts => ts.Venue.VenueId == location) // Filtert op locatie ID.
                                       .ToListAsync();
 
             return shows;
         }
+
+        // Methode om shows te filteren op basis van een datumbereik.
         public async Task<List<dynamic>> FilterShowsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            // Fetch all venues and their shows
+            // Haalt alle locaties en hun shows op.
             var venues = await _context.Venue
                 .Include(v => v.TheatreShows)
-                    .ThenInclude(ts => ts.theatreShowDates)
+                    .ThenInclude(ts => ts.theatreShowDates) // Inclusief showdatums.
                 .ToListAsync();
 
-            // Filter shows based on the date range
+            // Filtert shows op basis van het datumbereik.
             var filteredShows = venues
                 .SelectMany(v => v.TheatreShows, (v, ts) => new { Venue = v, TheatreShow = ts })
                 .SelectMany(ts => ts.TheatreShow.theatreShowDates
-                    .Where(tsd => tsd.DateAndTime >= startDate && tsd.DateAndTime <= endDate)
-                    .Select(tsd => (dynamic)new // Cast the anonymous type to dynamic here
+                    .Where(tsd => tsd.DateAndTime >= startDate && tsd.DateAndTime <= endDate) // Filtert op datum.
+                    .Select(tsd => (dynamic)new // Cast naar dynamic type.
                     {
                         tsd.TheatreShowDateId,
                         tsd.DateAndTime,
@@ -165,9 +172,11 @@ namespace Services
 
             return filteredShows;
         }
+
+        // Methode om een nieuwe show aan te maken.
         public async Task<string> CreateShowAsync(TheatreShow newShow)
         {
-            // Detach the venue if it exists to avoid re-inserting it
+            // Controleert of de locatie al bestaat om duplicaten te vermijden.
             var existingVenue = await _context.Venue.FindAsync(newShow.Venue.VenueId);
 
             if (existingVenue == null)
@@ -175,14 +184,14 @@ namespace Services
                 return "Venue not found.";
             }
 
-            // Assign the existing venue to the new show
-            newShow.Venue = existingVenue;
+            newShow.Venue = existingVenue; // Wijst de bestaande locatie toe aan de show.
 
             _context.TheatreShow.Add(newShow);
             await _context.SaveChangesAsync();
             return "Show created successfully.";
         }
 
+        // Methode om een bestaande show te updaten.
         public async Task<string> UpdateShowAsync(int id, TheatreShow updatedShow)
         {
             // Find the existing show by id
@@ -195,12 +204,12 @@ namespace Services
                 return "Show not found.";
             }
 
-            // Update the Title, Description adn the Price
+            // Update de titel, beschrijving en prijs.
             oldShow.Title = updatedShow.Title;
             oldShow.Description = updatedShow.Description;
             oldShow.Price = updatedShow.Price;
 
-            // Update the venue
+            // Update de venue.
             if (oldShow.Venue.VenueId != updatedShow.Venue.VenueId)
             {
                 var existingVenue = await _context.Venue.FindAsync(updatedShow.Venue.VenueId);
@@ -214,7 +223,7 @@ namespace Services
                 }
             }
 
-            // Update theatre show dates
+            // Update showdatums.
             oldShow.theatreShowDates.Clear();
 
             foreach (var date in updatedShow.theatreShowDates)
@@ -228,9 +237,10 @@ namespace Services
             return "Show updated successfully.";
         }
 
+        // Methode om een show te verwijderen.
         public async Task<string> DeleteShowAsync(int id)
         {
-            // Find the show by id
+            // Zoekt naar de show op basis van ID.
             var show = await _context.TheatreShow.Include(s => s.theatreShowDates)
                                                  .FirstOrDefaultAsync(s => s.TheatreShowId == id);
 
@@ -239,7 +249,7 @@ namespace Services
                 return "Show not found.";
             }
 
-            // Remove the associated TheatreShowDates and the show
+            // Verwijdert de bijbehorende showdatums en de show zelf.
             _context.TheatreShowDate.RemoveRange(show.theatreShowDates);
             _context.TheatreShow.Remove(show);
 

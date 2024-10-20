@@ -14,73 +14,75 @@ namespace Services
             _context = context;
         }
 
+        // Methode om alle snacks op te halen als een dictionary (SnackId, SnackNaam)
         public async Task<Dictionary<int, string>> GetAllSnacksAsync()
         {
-            Dictionary<int, string> dict = new Dictionary<int, string>();
-            var snack = _context.Snacks;
+            Dictionary<int, string> dict = new Dictionary<int, string>(); // Dictionary om snacks op te slaan.
+            var snack = _context.Snacks; // Haalt alle snacks op uit de database.
             foreach (var item in snack)
             {
-                dict.Add(item.SnacksId, item.Name);
+                dict.Add(item.SnacksId, item.Name); // Voegt elke snack toe aan de dictionary.
             }
             return dict;
         }
 
+        // Methode om een snackbestelling te plaatsen voor een specifieke reservatie
         public async Task<Dictionary<int, int>> PlaceSnackOrder(int? reservationId, List<SnackOrder> snackOrders)
         {
-            Dictionary<int, int> snackOrderDictionary = new Dictionary<int, int>();
+            Dictionary<int, int> snackOrderDictionary = new Dictionary<int, int>(); // Dictionary om de bestelde snacks en hoeveelheden op te slaan.
 
-            // Logic to handle reservationId
+            // Logica om de reservatie te behandelen
             Reservation reservation = null;
 
             if (reservationId.HasValue)
             {
-                // Check if the reservation exists, or create a new reservation if necessary
+                // Controleert of de reservatie bestaat
                 reservation = await _context.Reservation.FindAsync(reservationId.Value);
 
                 if (reservation == null)
                 {
-                    return null;
+                    return null; // Retourneert null als de reservatie niet bestaat.
                 }
             }
             else
             {
-                return new Dictionary<int, int>(); // Handle invalid or missing reservationId
+                return new Dictionary<int, int>(); // Retourneert een lege dictionary als reservationId niet geldig is.
             }
 
-            // Loop through the snack orders and save them to the database
+            // Doorloopt de snackbestellingen en slaat ze op in de database
             foreach (var order in snackOrders)
             {
                 if (order.id.HasValue && order.amount.HasValue)
                 {
-                    // Check if the snack exists
+                    // Controleert of de snack bestaat
                     var snack = await _context.Snacks.FindAsync(order.id.Value);
                     if (snack != null)
                     {
-                        // Create a new ReservationSnack entry
+                        // Maakt een nieuwe ReservationSnack aan
                         var reservationSnack = new ReservationSnack
                         {
                             ReservationId = reservation.ReservationId,
                             SnacksId = snack.SnacksId,
                             Amount = order.amount.Value,
-                            TotalPrice = snack.Price * order.amount.Value // Assuming TotalPrice is calculated based on snack price
+                            TotalPrice = snack.Price * order.amount.Value // Berekent de totale prijs op basis van de snackprijs.
                         };
 
-                        _context.ReservationSnacks.Add(reservationSnack);
+                        _context.ReservationSnacks.Add(reservationSnack); // Voegt de ReservationSnack toe aan de database.
 
-                        // Add to the dictionary (for the response)
+                        // Voegt de bestelde snack en hoeveelheid toe aan de dictionary
                         snackOrderDictionary[snack.SnacksId] = order.amount.Value;
                     }
                     else
                     {
-                        throw new Exception($"Snack with ID {order.id.Value} does not exist.");
+                        throw new Exception($"Snack with ID {order.id.Value} does not exist."); // Gooi een foutmelding als de snack niet bestaat.
                     }
                 }
             }
 
-            // Save changes to the database (both ReservationSnacks and any new Reservation)
+            // Slaat wijzigingen op in de database (zowel ReservationSnacks als nieuwe Reservation)
             await _context.SaveChangesAsync();
 
-            return snackOrderDictionary;
+            return snackOrderDictionary; // Retourneert de dictionary met de bestelde snacks.
         }
 
 
