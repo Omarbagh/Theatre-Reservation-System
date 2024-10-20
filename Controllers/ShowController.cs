@@ -24,188 +24,192 @@ public class ShowController : ControllerBase
         _context = context;
         _showService = showService;
     }
-    [HttpGet]
+
+    // Endpoint: GET http://localhost:5097/api/v1/shows
+    [HttpGet] // Endpoint om alle shows op te halen
     public async Task<IActionResult> GetAllShows()
     {
         try
         {
-            var shows = await _showService.GetShows();
-            return Ok(shows);
+            var shows = await _showService.GetShows(); // Haalt alle shows op via de showservice.
+            return Ok(shows); // Geeft de shows terug als een HTTP 200 OK response.
         }
         catch (Exception ex)
         {
-            // Log the exception (e.g., using a logging framework)
-            return StatusCode(500, "Internal server error: " + ex.Message);
+            return StatusCode(500, "Internal server error: " + ex.Message); // Geeft een HTTP 500 statuscode terug bij een fout.
         }
     }
-    [HttpGet("{id}")]
+
+    // Endpoint: GET http://localhost:5097/api/v1/shows/{id}
+    [HttpGet("{id}")] // HTTP GET om een specifieke show op te halen op basis van ID.
     public async Task<IActionResult> FindId(int id)
     {
-        // Call the service method to get the show by ID
-        var show = await _showService.ShowWithId(id); // Assuming you have injected ShowService
+        var show = await _showService.ShowWithId(id); // Haalt de show op met de opgegeven ID via de showservice.
 
         if (show == null)
         {
-            return NotFound($"Show with ID {id} not found.");
+            return NotFound($"Show with ID {id} not found."); // Geeft een 404 Not Found terug als de show niet bestaat.
         }
 
-        var jsonOptions = new JsonSerializerOptions
+        var jsonOptions = new JsonSerializerOptions // Configuratie voor JSON-serialisatie.
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles  // Negeert cyclische referenties.
         };
 
-        return new JsonResult(show, jsonOptions);
+        return new JsonResult(show, jsonOptions); // Geeft de show terug als JSON.
     }
 
 
-
-    [HttpGet("filter/title")]
+    // Endpoint: GET http://localhost:5097/api/v1/shows/filter/title?filter={filter}
+    [HttpGet("filter/title")]  // HTTP GET om shows te filteren op titel.
     public async Task<IActionResult> FilteronTitle(string filter)
     {
-        var shows = await _showService.ShowFilterTitle(filter);
-        return Ok(shows);
+        var shows = await _showService.ShowFilterTitle(filter); // Haalt shows op die aan de titelcriteria voldoen.
+        return Ok(shows); // Geeft de gefilterde shows terug als een HTTP 200 OK response.
     }
 
 
 
-
-    [HttpGet("filter/location")]
+    // Endpoint: GET http://localhost:5097/api/v1/shows/filter/location?location={location}
+    [HttpGet("filter/location")] // HTTP GET om shows te filteren op locatie.
     public async Task<IActionResult> FilteronLocation([FromQuery] int location)
     {
         if (location <= 0)
         {
-            return BadRequest("Invalid location ID.");
+            return BadRequest("Invalid location ID."); // Geeft een 400 Bad Request terug als het locatie-ID ongeldig is.
         }
 
-        var shows = await _showService.ShowFilterLocationAsync(location);
+        var shows = await _showService.ShowFilterLocationAsync(location); // Haalt shows op voor de opgegeven locatie.
 
         if (shows == null || shows.Count == 0)
         {
-            return NotFound($"No shows found for location ID {location}.");
+            return NotFound($"No shows found for location ID {location}."); // Geeft een 404 Not Found terug als er geen shows zijn.
         }
 
-        var jsonOptions = new JsonSerializerOptions
+        var jsonOptions = new JsonSerializerOptions // Configuratie voor JSON-serialisatie.
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles // Negeert cyclische referenties.
         };
 
-        return new JsonResult(shows, jsonOptions);
+        return new JsonResult(shows, jsonOptions); // Geeft de gefilterde shows terug als JSON.
     }
 
-
-
-    [HttpGet("filter/date")]
+    // Endpoint: GET http://localhost:5097/api/v1/shows/filter/date?date1=2024-10-01&date2=2024-10-31&sortBy=date&sortOrder=asc
+    // Endpoint: GET http://localhost:5097/api/v1/shows/filter/date?date1={date1}&date2={date2}&sortBy={sortBy}&sortOrder={sortOrder}
+    [HttpGet("filter/date")] // HTTP GET om shows te filteren op datumbereik.
     public async Task<IActionResult> FilterByDateRange(
     [FromQuery] string date1,
     [FromQuery] string date2,
-    [FromQuery] string sortBy = "date", // Default sort by date
-    [FromQuery] string sortOrder = "asc" // Default sort order is ascending
+    [FromQuery] string sortBy = "date", // Standaard sorteren op datum.
+    [FromQuery] string sortOrder = "asc" // Standaard sorteervolgorde is oplopend.
 )
     {
-        // Parse the date strings to DateTime
+        // Probeer de datums te parseren naar DateTime.
         if (!DateTime.TryParse(date1, out DateTime startDate) ||
             !DateTime.TryParse(date2, out DateTime endDate))
         {
-            return BadRequest("Invalid date format. Please use a valid date format (e.g., yyyy-MM-dd).");
+            return BadRequest("Invalid date format. Please use a valid date format (e.g., yyyy-MM-dd)."); // Geeft een 400 Bad Request terug als het datumformaat ongeldig is.
         }
 
-        // Ensure the end date is greater than or equal to the start date
+        // Zorg ervoor dat de einddatum groter is dan of gelijk aan de startdatum.
         if (endDate < startDate)
         {
-            return BadRequest("The end date must be greater than or equal to the start date.");
+            return BadRequest("The end date must be greater than or equal to the start date."); // Geeft een 400 Bad Request terug als de einddatum ongeldig is.
         }
 
-        // Call the service to get the filtered shows
+        // Roep de service aan om de gefilterde shows te krijgen.
         var filteredShows = await _showService.FilterShowsByDateRangeAsync(startDate, endDate);
 
         if (!filteredShows.Any())
         {
-            return NotFound("No shows found within the specified date range.");
+            return NotFound("No shows found within the specified date range."); // Geeft een 404 Not Found terug als er geen shows zijn.
         }
 
         // Sort the filtered shows based on the sortBy and sortOrder parameters
         var sortedShows = SortShows(filteredShows, sortBy, sortOrder);
 
-        var jsonOptions = new JsonSerializerOptions
+        var jsonOptions = new JsonSerializerOptions // Configuratie voor JSON-serialisatie.
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles // Negeert cyclische referenties.
         };
 
-        return new JsonResult(sortedShows.ToList(), jsonOptions);
+        return new JsonResult(sortedShows.ToList(), jsonOptions); // Geeft de gesorteerde shows terug als JSON.
     }
 
     private static IOrderedEnumerable<dynamic> SortShows(IEnumerable<dynamic> shows, string sortBy, string sortOrder)
     {
-        IOrderedEnumerable<dynamic> sortedShows;
+        IOrderedEnumerable<dynamic> sortedShows; // Variabele voor de gesorteerde shows.
 
-        switch (sortBy.ToLower())
+        switch (sortBy.ToLower()) // Controleert op het veld waarop gesorteerd moet worden.
         {
             case "title":
                 sortedShows = sortOrder.ToLower() == "desc"
-                    ? shows.OrderByDescending(show => show.TheatreShowTitle)
-                    : shows.OrderBy(show => show.TheatreShowTitle);
+                    ? shows.OrderByDescending(show => show.TheatreShowTitle) // Sorteert op titel in aflopende volgorde.
+                    : shows.OrderBy(show => show.TheatreShowTitle); // Sorteert op titel in oplopende volgorde.
                 break;
 
             case "price":
                 sortedShows = sortOrder.ToLower() == "desc"
-                    ? shows.OrderByDescending(show => show.Price)
-                    : shows.OrderBy(show => show.Price);
+                    ? shows.OrderByDescending(show => show.Price) // Sorteert op prijs in aflopende volgorde.
+                    : shows.OrderBy(show => show.Price); // Sorteert op prijs in oplopende volgorde.
                 break;
 
             case "date":
             default:
                 sortedShows = sortOrder.ToLower() == "desc"
-                    ? shows.OrderByDescending(show => show.DateAndTime)
-                    : shows.OrderBy(show => show.DateAndTime);
+                    ? shows.OrderByDescending(show => show.DateAndTime) // Sorteert op datum in aflopende volgorde.
+                    : shows.OrderBy(show => show.DateAndTime); // Sorteert op datum in oplopende volgorde.
                 break;
         }
 
-        return sortedShows;
+        return sortedShows; // Geeft de gesorteerde shows terug.
     }
 
-
-    [HttpPost("AddShow")]
+    // Endpoint: POST http://localhost:5097/api/v1/shows/AddShow
+    [HttpPost("AddShow")] // HTTP POST om een nieuwe show toe te voegen.
     [ServiceFilter(typeof(AdminAuthFilter))]
 
     public async Task<IActionResult> CreateShow([FromBody] TheatreShow newShow)
     {
 
-        var result = await _showService.CreateShowAsync(newShow);
+        var result = await _showService.CreateShowAsync(newShow); // Roept de service aan om de nieuwe show aan te maken.
 
         if (result == "Venue not found.")
         {
-            return NotFound(result);
+            return NotFound(result); // Geeft een 404 Not Found terug als de locatie niet bestaat.
         }
 
-        return Ok(result);
+        return Ok(result); // Geeft de resultaat terug als een HTTP 200 OK response.
     }
 
-    [HttpPut("UpdateShow/{id}")]
+    // Endpoint: PUT http://localhost:5097/api/v1/shows/UpdateShow/{id}
+    [HttpPut("UpdateShow/{id}")] // HTTP PUT om een bestaande show bij te werken op basis van ID.
     [ServiceFilter(typeof(AdminAuthFilter))]
     public async Task<IActionResult> UpdateShow(int id, [FromBody] TheatreShow show)
     {
-        var result = await _showService.UpdateShowAsync(id, show);
+        var result = await _showService.UpdateShowAsync(id, show); // Roept de service aan om de show bij te werken.
 
         if (result == "Show not found.")
         {
-            return NotFound(result);
+            return NotFound(result); // Geeft een 404 Not Found terug als de show niet bestaat.
         }
 
-        return Ok(result);
+        return Ok(result); // Geeft de resultaat terug als een HTTP 200 OK response.
     }
 
-    [HttpDelete("DeleteShow/{id}")]
+    // Endpoint: DELETE http://localhost:5097/api/v1/shows/DeleteShow/{id}
+    [HttpDelete("DeleteShow/{id}")] // HTTP DELETE om een show te verwijderen op basis van ID.
     [ServiceFilter(typeof(AdminAuthFilter))]
     public async Task<IActionResult> DeleteShow(int id)
     {
 
-        var result = await _showService.DeleteShowAsync(id);
+        var result = await _showService.DeleteShowAsync(id); // Roept de service aan om de show te verwijderen.
 
         if (result == "Show not found.")
         {
-            return NotFound(result);
+            return NotFound(result); // Geeft een 404 Not Found terug als de show niet bestaat.
         }
 
-        return Ok(result);
+        return Ok(result); // Geeft de resultaat terug als een HTTP 200 OK response.
     }
 }

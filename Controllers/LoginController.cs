@@ -52,26 +52,28 @@ public class LoginController : Controller
     public async Task<IActionResult> IsAdminLoggedIn()
     {
 
-        // Get the username from the HTTP context directly
+        // Haal de gebruikersnaam op uit de HTTP-context (sessie).
         var username = HttpContext.Session.GetString("Username");
 
+        // Controleer of de gebruikersnaam leeg of null is.
         if (string.IsNullOrEmpty(username))
         {
-            return Unauthorized(new { IsLoggedIn = false });
+            return Unauthorized(new { IsLoggedIn = false }); // Geeft een 401 Unauthorized terug als de admin niet is ingelogd.
         }
 
-        // Use LINQ to query the database
+        // Gebruik LINQ om de database te doorzoeken en de admin op te halen op basis van de gebruikersnaam.
         var admin = await _context.Admin
-            .Where(a => a.UserName == username)
-            .Select(a => a.UserName)
-            .FirstOrDefaultAsync();
+            .Where(a => a.UserName == username) // Filtert op gebruikersnaam.
+            .Select(a => a.UserName) // Selecteert de gebruikersnaam van de admin.
+            .FirstOrDefaultAsync(); // Haalt de eerste overeenkomende admin op of null als er geen is.
 
+        // Controleer of de admin is gevonden.
         if (admin != null)
         {
-            return Ok(new { IsLoggedIn = true, AdminName = admin });
+            return Ok(new { IsLoggedIn = true, AdminName = admin }); // Geeft een 200 OK response terug met inlogstatus en adminnaam.
         }
 
-        return Unauthorized(new { IsLoggedIn = false });
+        return Unauthorized(new { IsLoggedIn = false }); // Geeft een 401 Unauthorized terug als de admin niet is gevonden.
     }
 
     [HttpGet("Logout")]
