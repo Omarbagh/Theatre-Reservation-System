@@ -19,23 +19,24 @@ namespace Services
         public async Task<List<ReservationResponseDto>> GetReservations(int? showId, DateTime? date)
         {
             var query = _context.Reservation
-                .Include(r => r.Customer)
+                .Include(r => r.Customer) // Voegt klantgegevens toe aan de query.
                 .Include(r => r.TheatreShowDate)
-                    .ThenInclude(tsd => tsd.TheatreShow)
-                .AsQueryable();
+                    .ThenInclude(tsd => tsd.TheatreShow) // Voegt theatervoorstellingsgegevens toe.
+                .AsQueryable(); // Start de query als doorzoekbaar.
 
             if (showId.HasValue)
             {
-                query = query.Where(r => r.TheatreShowDate.TheatreShow.TheatreShowId == showId.Value);
+                query = query.Where(r => r.TheatreShowDate.TheatreShow.TheatreShowId == showId.Value); // Filtert op showId als deze is opgegeven.
             }
 
             if (date.HasValue)
             {
-                query = query.Where(r => r.TheatreShowDate.DateAndTime.Date == date.Value.Date);
+                query = query.Where(r => r.TheatreShowDate.DateAndTime.Date == date.Value.Date); // Filtert op datum als deze is opgegeven.
             }
 
-            var reservations = await query.ToListAsync();
+            var reservations = await query.ToListAsync(); // Voert de query uit en haalt de resultaten op.
 
+            // Maakt een lijst van DTO's (Data Transfer Objects) om de reserveringen terug te geven.
             return reservations.Select(r => new ReservationResponseDto
             {
                 ReservationId = r.ReservationId,
@@ -66,23 +67,24 @@ namespace Services
         public async Task<List<ReservationResponseDto>> SearchReservations(string email, int? reservationId)
         {
             var query = _context.Reservation
-                .Include(r => r.Customer)
+                .Include(r => r.Customer) // Voegt klantgegevens toe aan de query.
                 .Include(r => r.TheatreShowDate)
-                    .ThenInclude(tsd => tsd.TheatreShow)
-                .AsQueryable();
+                    .ThenInclude(tsd => tsd.TheatreShow) // Voegt theatervoorstellingsgegevens toe.
+                .AsQueryable(); // Start de query als doorzoekbaar.
 
             if (!string.IsNullOrEmpty(email))
             {
-                query = query.Where(r => r.Customer.Email.Contains(email));
+                query = query.Where(r => r.Customer.Email.Contains(email)); // Filtert op e-mail als deze is opgegeven.
             }
 
             if (reservationId.HasValue)
             {
-                query = query.Where(r => r.ReservationId == reservationId.Value);
+                query = query.Where(r => r.ReservationId == reservationId.Value); // Filtert op reserverings-ID als deze is opgegeven.
             }
 
-            var reservations = await query.ToListAsync();
+            var reservations = await query.ToListAsync(); // Voert de query uit en haalt de resultaten op.
 
+            // Maakt een lijst van DTO's (Data Transfer Objects) om de reserveringen terug te geven.
             return reservations.Select(r => new ReservationResponseDto
             {
                 ReservationId = r.ReservationId,
@@ -112,32 +114,32 @@ namespace Services
 
         public async Task<string> MarkReservationAsUsed(int id)
         {
-            var reservation = await _context.Reservation.FindAsync(id);
+            var reservation = await _context.Reservation.FindAsync(id); // Zoekt de reservering op basis van ID.
 
             if (reservation == null)
             {
-                return $"Reservation with ID {id} not found.";
+                return $"Reservation with ID {id} not found."; // Geeft een foutmelding terug als de reservering niet bestaat.
             }
 
-            reservation.Used = true;
-            await _context.SaveChangesAsync();
+            reservation.Used = true; // Markeert de reservering als gebruikt.
+            await _context.SaveChangesAsync(); // Slaat de wijzigingen op in de database.
 
-            return $"Reservation with ID {id} has been marked as used.";
+            return $"Reservation with ID {id} has been marked as used."; // Geeft een succesmelding terug.
         }
 
         public async Task<string> DeleteReservation(int id)
         {
-            var reservation = await _context.Reservation.FindAsync(id);
+            var reservation = await _context.Reservation.FindAsync(id); // Zoekt de reservering op basis van ID.
 
             if (reservation == null)
             {
-                return $"Reservation with ID {id} not found.";
+                return $"Reservation with ID {id} not found."; // Geeft een foutmelding terug als de reservering niet bestaat.
             }
 
-            _context.Reservation.Remove(reservation);
-            await _context.SaveChangesAsync();
+            _context.Reservation.Remove(reservation); // Verwijdert de reservering uit de database.
+            await _context.SaveChangesAsync(); // Slaat de wijzigingen op in de database.
 
-            return $"Reservation with ID {id} has been deleted.";
+            return $"Reservation with ID {id} has been deleted."; // Geeft een succesmelding terug.
         }
     }
 }

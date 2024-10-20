@@ -19,29 +19,29 @@ public class AdminAuthFilter : IAsyncActionFilter
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        // Get the username from the session
+        // Haal de gebruikersnaam op uit de sessie
         var username = _httpContextAccessor.HttpContext.Session.GetString("Username");
 
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrEmpty(username)) // Controleert of er geen gebruikersnaam in de sessie is.
         {
-            // No username in session
-            context.Result = new UnauthorizedObjectResult(new { IsLoggedIn = false });
-            return;
+            // Geen gebruikersnaam in sessie
+            context.Result = new UnauthorizedObjectResult(new { IsLoggedIn = false }); // Retourneert een ongeautoriseerde respons.
+            return; // Verlaat de methode.
         }
 
-        // Check if the username exists in the Admin table
+        // Controleer of de gebruikersnaam bestaat in de Admin-tabel
         var admin = await _context.Admin
-            .Where(a => a.UserName == username)
+            .Where(a => a.UserName == username) // Zoekt naar een admin met de opgegeven gebruikersnaam.
             .FirstOrDefaultAsync();
 
-        if (admin == null)
+        if (admin == null) // Controleert of de admin niet is gevonden.
         {
-            // If the admin is not found, return Unauthorized
-            context.Result = new UnauthorizedObjectResult(new { IsLoggedIn = false });
-            return;
+            // Als de admin niet is gevonden, retourneer ongeautoriseerd
+            context.Result = new UnauthorizedObjectResult(new { IsLoggedIn = false }); // Retourneert een ongeautoriseerde respons.
+            return; // Verlaat de methode.
         }
 
-        // Admin found, continue to the action
-        await next();
+        // Admin gevonden, ga verder met de actie
+        await next(); // Voert de volgende actie in de pijplijn uit.
     }
 }
