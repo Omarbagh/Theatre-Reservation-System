@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using Services;
 
 public interface IReservationService
 {
@@ -12,10 +13,13 @@ public interface IReservationService
 public class ReservationService : IReservationService
 {
     private readonly DatabaseContext _context;
+    private readonly ReservationManagementService _reservationManagementService;
+
 
     public ReservationService(DatabaseContext context)
     {
         _context = context;
+        _reservationManagementService = new ReservationManagementService(_context);
     }
 
     public async Task<ReservationResponseDto> CreateReservationAsync(ReservationDto reservationDto, List<SnackOrder> snackOrders)
@@ -93,9 +97,13 @@ public class ReservationService : IReservationService
 
         if (theatreShowDate.TheatreShow.Venue != null)
         {
+
+
+
             // Creëert een nieuw AdminDashboard entry met alle relevante gegevens van de reservering en show.
             var adminDashboardEntry = new AdminDashboard
             {
+                ReservationId = reservation.ReservationId,
                 CustomerId = customer.CustomerId,
                 TheatreShowId = theatreShowDate.TheatreShow.TheatreShowId,
                 VenueId = theatreShowDate.TheatreShow.Venue.VenueId,
@@ -104,6 +112,7 @@ public class ReservationService : IReservationService
                 SnacksDetails = snackDetails,
                 DateAndTime = DateTime.UtcNow,
                 ReservationUsed = false
+
             };
 
             _context.AdminDashboards.Add(adminDashboardEntry);
