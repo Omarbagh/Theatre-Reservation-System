@@ -21,6 +21,7 @@ export const initLogState: LoginState = {
     }),
 };
 
+// Add and export LoginProps
 export interface LoginProps {
     insertLogin: (login: Login) => void;
 }
