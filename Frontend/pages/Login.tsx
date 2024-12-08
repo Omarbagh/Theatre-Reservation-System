@@ -1,5 +1,5 @@
 import React from "react";
-import { LoginProps, LoginState, initLogState } from "../pages/Login.state"; // Ensure correct path
+import { LoginProps, LoginState, initLogState } from "./Login.state"; // Ensure correct path
 
 export class LoginForm extends React.Component<LoginProps, LoginState> {
     constructor(props: LoginProps) {
