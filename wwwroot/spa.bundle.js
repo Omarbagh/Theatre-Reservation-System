@@ -18,11 +18,10 @@ var spa;
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
 
 
-var BASE_URL = "api/v1/Login"; //route
-
+var BASE_URL = "api/v1/Login";
 var login = /*#__PURE__*/function () {
   var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(data) {
-    var response;
+    var response, errorResponse;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
@@ -33,18 +32,22 @@ var login = /*#__PURE__*/function () {
               "Content-Type": "application/json"
             },
             body: JSON.stringify(data),
-            credentials: "include" // This sends the session cookie with the request
+            credentials: "include"
           });
         case 2:
           response = _context.sent;
           if (response.ok) {
-            _context.next = 5;
+            _context.next = 8;
             break;
           }
-          throw new Error("Failed to login");
-        case 5:
-          return _context.abrupt("return", response.json());
+          _context.next = 6;
+          return response.json();
         case 6:
+          errorResponse = _context.sent;
+          throw new Error(errorResponse.message || "Login failed");
+        case 8:
+          return _context.abrupt("return", response.json());
+        case 9:
         case "end":
           return _context.stop();
       }
@@ -63,7 +66,7 @@ var isAdminLoggedIn = /*#__PURE__*/function () {
           _context2.next = 2;
           return fetch("".concat(BASE_URL, "/IsAdminLoggedIn"), {
             method: "GET",
-            credentials: "include" // Include the session cookie in this request
+            credentials: "include"
           });
         case 2:
           response = _context2.sent;
@@ -107,7 +110,6 @@ var initLogState = {
   password: "",
   showMessage: false,
   errorMessage: "",
-  // Initialize errorMessage
   updateUserName: function updateUserName(name) {
     return function (state) {
       return _objectSpread(_objectSpread({}, state), {}, {
@@ -209,11 +211,10 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
       })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("button", {
         disabled: loaderState === "loading",
         onClick: /*#__PURE__*/(0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7___default().mark(function _callee() {
-          var loginResponse, adminStatus;
+          var loginResponse, adminStatus, _errorMessage;
           return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7___default().wrap(function _callee$(_context) {
             while (1) switch (_context.prev = _context.next) {
               case 0:
-                // Set the loader state to loading
                 _this2.setState(_this2.state.setLoaderState("loading"));
                 _context.prev = 1;
                 _context.next = 4;
@@ -227,44 +228,40 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
                 return (0,_login_api__WEBPACK_IMPORTED_MODULE_10__.isAdminLoggedIn)();
               case 7:
                 adminStatus = _context.sent;
-                console.log("Admin status response:", adminStatus);
                 if (adminStatus.isLoggedIn) {
                   _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
                     showMessage: true,
-                    errorMessage: "" // Clear any error message
+                    errorMessage: ""
                   }));
                   alert("Welcome, Admin ".concat(adminStatus.adminName || "Unknown", "!"));
                 } else {
                   _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
                     showMessage: false,
-                    errorMessage: "Login successful, but not an admin." // Display message for non-admin login
+                    errorMessage: "Login successful, but not an admin."
                   }));
                   alert("Login successful!");
                 }
-
-                // Clear the form fields
                 _this2.setState(_this2.state.clearFields);
-                _context.next = 17;
+                _context.next = 16;
                 break;
-              case 13:
-                _context.prev = 13;
+              case 12:
+                _context.prev = 12;
                 _context.t0 = _context["catch"](1);
-                console.error("Error during login:", _context.t0);
+                _errorMessage = _context.t0.message || "An unexpected error occurred. Please try again.";
                 _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
-                  errorMessage: "Login failed, please try again." // Set error message
+                  errorMessage: _errorMessage
                 }));
-              case 17:
-                _context.prev = 17;
-                // Reset the loader state
+              case 16:
+                _context.prev = 16;
                 _this2.setState(_this2.state.setLoaderState("unloaded"));
-                return _context.finish(17);
-              case 20:
+                return _context.finish(16);
+              case 19:
               case "end":
                 return _context.stop();
             }
-          }, _callee, null, [[1, 13, 17, 20]]);
+          }, _callee, null, [[1, 12, 16, 19]]);
         }))
-      }, loaderState === "loading" ? "Logging in..." : "Login")), showMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, "Welcome back, ", username, "!"), errorMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", {
+      }, loaderState === "loading" ? "Logging in..." : "Login")), errorMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", {
         style: {
           color: "red"
         }

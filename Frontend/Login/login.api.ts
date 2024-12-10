@@ -1,5 +1,4 @@
-import { Login } from "../Home/home.state";
-const BASE_URL = "api/v1/Login"; //route
+const BASE_URL = "api/v1/Login";
 
 export const login = async (data: any) => {
     const response = await fetch(`${BASE_URL}/Login`, {
@@ -8,24 +7,26 @@ export const login = async (data: any) => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-        credentials: "include", // This sends the session cookie with the request
+        credentials: "include",
     });
+
     if (!response.ok) {
-        throw new Error("Failed to login");
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || "Login failed");
     }
+
     return response.json();
 };
 
 export const isAdminLoggedIn = async () => {
     const response = await fetch(`${BASE_URL}/IsAdminLoggedIn`, {
         method: "GET",
-        credentials: "include",  // Include the session cookie in this request
+        credentials: "include",
     });
+
     if (!response.ok) {
         throw new Error("Failed to fetch admin login status");
     }
+
     return response.json();
 };
-
-
-

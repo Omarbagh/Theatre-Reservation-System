@@ -34,7 +34,7 @@ module.exports = env => {
                     use: [{
                         loader: 'babel-loader',
                     }],
-                    exclude: '/node_modules/',
+                    exclude: /node_modules/,
                 },
                 { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
             ],
@@ -59,9 +59,6 @@ module.exports = env => {
             new ForkTsCheckerWebpackPlugin(),
             new webpack.ProvidePlugin({
                 Buffer: ['buffer', 'Buffer'],
-            }),
-            new webpack.ProvidePlugin({
-                process: 'process/browser',
             }),
         ],
     };
