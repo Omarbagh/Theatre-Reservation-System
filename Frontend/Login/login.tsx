@@ -2,6 +2,9 @@ import React from "react";
 import { initLogState, LoginState } from "./login.state";
 import { login, isAdminLoggedIn } from "./login.api";
 
+
+
+
 export class LoginForm extends React.Component<{}, LoginState> {
     constructor(props: {}) {
         super(props);
@@ -56,6 +59,7 @@ export class LoginForm extends React.Component<{}, LoginState> {
                                         errorMessage: "",
                                     });
                                     alert(`Welcome, Admin ${adminStatus.adminName || "Unknown"}!`);
+                                    this.setState(this.state.updateViewState("dashboard"));
                                 } else {
                                     this.setState({
                                         ...this.state,

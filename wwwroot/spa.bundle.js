@@ -136,6 +136,14 @@ var initLogState = {
         loaderState: loaderState
       });
     };
+  },
+  view: "login",
+  updateViewState: function updateViewState(view) {
+    return function (state) {
+      return _objectSpread(_objectSpread({}, state), {}, {
+        view: view
+      });
+    };
   }
 };
 
@@ -234,6 +242,7 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
                     errorMessage: ""
                   }));
                   alert("Welcome, Admin ".concat(adminStatus.adminName || "Unknown", "!"));
+                  _this2.setState(_this2.state.updateViewState("dashboard"));
                 } else {
                   _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
                     showMessage: false,
@@ -29517,7 +29526,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var main = function main() {
   var rootElement = document.querySelector('#root');
-  react_dom__WEBPACK_IMPORTED_MODULE_1__.render(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Login_login__WEBPACK_IMPORTED_MODULE_2__.LoginForm, null), rootElement); // gebruik render() zoals voorheen
+  react_dom__WEBPACK_IMPORTED_MODULE_1__.render(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Login_login__WEBPACK_IMPORTED_MODULE_2__.LoginForm, null), rootElement);
 };
 })();
 
