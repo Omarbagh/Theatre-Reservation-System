@@ -9,23 +9,25 @@ export class LoginForm extends React.Component<{}, LoginState> {
     }
 
     render(): JSX.Element {
+        const { username, password, loaderState, showMessage, errorMessage } = this.state;
+
         return (
             <div>
-                <div>Welcome to the Login Page</div>
+                <h2>Welcome to the Login Page</h2>
 
                 <div>
-                    Username:
+                    <label>Username:</label>
                     <input
-                        value={this.state.username}
+                        value={username}
                         onChange={(e) =>
                             this.setState(this.state.updateUserName(e.currentTarget.value))
                         }
                     />
                 </div>
                 <div>
-                    Password:
+                    <label>Password:</label>
                     <input
-                        value={this.state.password}
+                        value={password}
                         type="password"
                         onChange={(e) =>
                             this.setState(this.state.updatePassword(e.currentTarget.value))
@@ -35,45 +37,62 @@ export class LoginForm extends React.Component<{}, LoginState> {
 
                 <div>
                     <button
-                        disabled={this.state.loaderState === "loading"}
-                        onClick={() => {
-                            this.setState(this.state.setLoaderState("loading"), async () => {
-                                try {
-                                    await login({
-                                        username: this.state.username,
-                                        password: this.state.password,
+                        disabled={loaderState === "loading"}
+                        onClick={async () => {
+                            // Set the loader state to loading
+                            this.setState(this.state.setLoaderState("loading"));
+
+                            try {
+                                // Call login API
+                                const loginResponse = await login({
+                                    username: this.state.username,
+                                    password: this.state.password,
+                                });
+
+                                // Check admin login status
+                                const adminStatus = await isAdminLoggedIn();
+                                console.log("Admin status response:", adminStatus);
+
+                                if (adminStatus.isLoggedIn) {
+                                    this.setState({
+                                        ...this.state,
+                                        showMessage: true,
+                                        errorMessage: "",  // Clear any error message
                                     });
-
-                                    // Check admin status
-                                    const adminStatus = await isAdminLoggedIn();
-                                    console.log("Admin status response:", adminStatus);
-
-                                    if (adminStatus.isLoggedIn) {
-                                        alert(`Welcome, Admin ${adminStatus.adminName || "Unknown"}!`);
-                                    } else {
-                                        alert("Login successful!");
-                                    }
-
-                                    this.setState(this.state.clearFields);
-                                } catch (error) {
-                                    console.error("Error during login:", error);
-                                    alert("Login failed, please try again.");
-                                } finally {
-                                    this.setState(this.state.setLoaderState("unloaded"));
+                                    alert(`Welcome, Admin ${adminStatus.adminName || "Unknown"}!`);
+                                } else {
+                                    this.setState({
+                                        ...this.state,
+                                        showMessage: false,
+                                        errorMessage: "Login successful, but not an admin.",  // Display message for non-admin login
+                                    });
+                                    alert("Login successful!");
                                 }
 
-                            });
+                                // Clear the form fields
+                                this.setState(this.state.clearFields);
+
+                            } catch (error) {
+                                console.error("Error during login:", error);
+                                this.setState({
+                                    ...this.state,
+                                    errorMessage: "Login failed, please try again.",  // Set error message
+                                });
+                            } finally {
+                                // Reset the loader state
+                                this.setState(this.state.setLoaderState("unloaded"));
+                            }
                         }}
                     >
-                        Login
+                        {loaderState === "loading" ? "Logging in..." : "Login"}
                     </button>
-
-                    <div>
-                        {this.state.showMessage && (
-                            <div>Welcome back, {this.state.username}!</div>
-                        )}
-                    </div>
                 </div>
+
+                {/* Conditional rendering of success message */}
+                {showMessage && <div>Welcome back, {username}!</div>}
+
+                {/* Error Message Display */}
+                {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
             </div>
         );
     }

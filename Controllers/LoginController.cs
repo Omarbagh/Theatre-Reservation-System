@@ -37,16 +37,17 @@ public class LoginController : Controller
         {
             case LoginStatus.Success:
                 HttpContext.Session.SetString("Username", loginBody.Username);
-                return Ok("Login successful");
+                return Ok(new { message = "Login successful" });  // Ensure JSON response
 
             case LoginStatus.IncorrectUsername:
-                return Unauthorized("Incorrect username");
+                return Unauthorized(new { message = "Incorrect username" });
 
             case LoginStatus.IncorrectPassword:
             default:
-                return Unauthorized("Incorrect password");
+                return Unauthorized(new { message = "Incorrect password" });
         }
     }
+
 
     [HttpGet("IsAdminLoggedIn")]
     public async Task<IActionResult> IsAdminLoggedIn()

@@ -14,10 +14,7 @@ namespace StarterKit
             builder.Logging.AddConsole();
 
             builder.Services.AddControllersWithViews();
-
             builder.Services.AddDistributedMemoryCache();
-
-
 
             builder.Services.AddSession(options =>
             {
@@ -37,9 +34,20 @@ namespace StarterKit
             builder.Services.AddScoped<IReservationService, ReservationService>();
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
-
             builder.Services.AddDbContext<DatabaseContext>(
                 options => options.UseSqlite(builder.Configuration.GetConnectionString("SqlLiteDb")));
+
+            // Add CORS policy to allow frontend on port 8080
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:8080")  // Allow your frontend's URL
+                          .AllowAnyMethod()  // Allow any HTTP method (GET, POST, etc.)
+                          .AllowAnyHeader()  // Allow any headers
+                          .AllowCredentials(); // Allow cookies for session management
+                });
+            });
 
             var app = builder.Build();
             builder.Services.AddLogging();
@@ -48,7 +56,6 @@ namespace StarterKit
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -58,12 +65,13 @@ namespace StarterKit
             app.UseRouting();
 
             app.UseAuthentication();
-
             app.UseAuthorization();
 
             app.UseMiddleware<JsonContentMiddleware>();
             app.UseMiddleware<RequestLoggingMiddleware>();
 
+            // Enable CORS globally
+            app.UseCors("AllowFrontend");
 
             app.UseSession();
 
@@ -72,7 +80,6 @@ namespace StarterKit
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
-
         }
     }
 }

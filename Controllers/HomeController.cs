@@ -14,11 +14,12 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    [HttpGet("{**slug}")]
+    [HttpGet]
     public IActionResult Index()
     {
-        return View();
+        return Redirect("api/v1/login");
     }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

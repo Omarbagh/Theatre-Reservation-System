@@ -31,12 +31,19 @@ var login = /*#__PURE__*/function () {
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: "include" // This sends the session cookie with the request
           });
         case 2:
           response = _context.sent;
+          if (response.ok) {
+            _context.next = 5;
+            break;
+          }
+          throw new Error("Failed to login");
+        case 5:
           return _context.abrupt("return", response.json());
-        case 4:
+        case 6:
         case "end":
           return _context.stop();
       }
@@ -55,7 +62,7 @@ var isAdminLoggedIn = /*#__PURE__*/function () {
           _context2.next = 2;
           return fetch("".concat(BASE_URL, "/IsAdminLoggedIn"), {
             method: "GET",
-            credentials: "include" // Use this if cookies/session are required
+            credentials: "include" // Include the session cookie in this request
           });
         case 2:
           response = _context2.sent;
@@ -98,6 +105,8 @@ var initLogState = {
   username: "",
   password: "",
   showMessage: false,
+  errorMessage: "",
+  // Initialize errorMessage
   updateUserName: function updateUserName(name) {
     return function (state) {
       return _objectSpread(_objectSpread({}, state), {}, {
@@ -114,7 +123,6 @@ var initLogState = {
   },
   clearFields: function clearFields(state) {
     return _objectSpread(_objectSpread({}, state), {}, {
-      //Clear the fieds here
       username: "",
       password: ""
     });
@@ -140,17 +148,18 @@ var initLogState = {
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   LoginForm: () => (/* binding */ LoginForm)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
-/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
-/* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js");
-/* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js");
-/* harmony import */ var _babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babel/runtime/helpers/inherits */ "./node_modules/@babel/runtime/helpers/esm/inherits.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var _login_state__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./login.state */ "./Login/login.state.ts");
-/* harmony import */ var _login_api__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./login.api */ "./Login/login.api.ts");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js");
+/* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js");
+/* harmony import */ var _babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @babel/runtime/helpers/inherits */ "./node_modules/@babel/runtime/helpers/esm/inherits.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _login_state__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./login.state */ "./Login/login.state.ts");
+/* harmony import */ var _login_api__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./login.api */ "./Login/login.api.ts");
 
 
 
@@ -158,7 +167,10 @@ var initLogState = {
 
 
 
-function _callSuper(t, o, e) { return o = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__["default"])(o), (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_3__["default"])(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_4__["default"])(t).constructor) : o.apply(t, e)); }
+
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _callSuper(t, o, e) { return o = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_5__["default"])(o), (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_4__["default"])(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_5__["default"])(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 
 
@@ -166,75 +178,99 @@ function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.
 var LoginForm = /*#__PURE__*/function (_React$Component) {
   function LoginForm(props) {
     var _this;
-    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_1__["default"])(this, LoginForm);
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_2__["default"])(this, LoginForm);
     _this = _callSuper(this, LoginForm, [props]);
-    _this.state = _login_state__WEBPACK_IMPORTED_MODULE_8__.initLogState;
+    _this.state = _login_state__WEBPACK_IMPORTED_MODULE_9__.initLogState;
     return _this;
   }
-  (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_5__["default"])(LoginForm, _React$Component);
-  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_2__["default"])(LoginForm, [{
+  (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_6__["default"])(LoginForm, _React$Component);
+  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_3__["default"])(LoginForm, [{
     key: "render",
     value: function render() {
       var _this2 = this;
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, "Welcome to the Login Page"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, "Username:", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("input", {
-        value: this.state.username,
+      var _this$state = this.state,
+        username = _this$state.username,
+        password = _this$state.password,
+        loaderState = _this$state.loaderState,
+        showMessage = _this$state.showMessage,
+        errorMessage = _this$state.errorMessage;
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("h2", null, "Welcome to the Login Page"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("label", null, "Username:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("input", {
+        value: username,
         onChange: function onChange(e) {
           return _this2.setState(_this2.state.updateUserName(e.currentTarget.value));
         }
-      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, "Password:", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("input", {
-        value: this.state.password,
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("label", null, "Password:"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("input", {
+        value: password,
         type: "password",
         onChange: function onChange(e) {
           return _this2.setState(_this2.state.updatePassword(e.currentTarget.value));
         }
-      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("button", {
-        disabled: this.state.loaderState === "loading",
-        onClick: function onClick() {
-          _this2.setState(_this2.state.setLoaderState("loading"), /*#__PURE__*/(0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_6___default().mark(function _callee() {
-            var adminStatus;
-            return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_6___default().wrap(function _callee$(_context) {
-              while (1) switch (_context.prev = _context.next) {
-                case 0:
-                  _context.prev = 0;
-                  _context.next = 3;
-                  return (0,_login_api__WEBPACK_IMPORTED_MODULE_9__.login)({
-                    username: _this2.state.username,
-                    password: _this2.state.password
-                  });
-                case 3:
-                  _context.next = 5;
-                  return (0,_login_api__WEBPACK_IMPORTED_MODULE_9__.isAdminLoggedIn)();
-                case 5:
-                  adminStatus = _context.sent;
-                  console.log("Admin status response:", adminStatus);
-                  if (adminStatus.isLoggedIn) {
-                    alert("Welcome, Admin ".concat(adminStatus.adminName || "Unknown", "!"));
-                  } else {
-                    alert("Login successful!");
-                  }
-                  _this2.setState(_this2.state.clearFields);
-                  _context.next = 15;
-                  break;
-                case 11:
-                  _context.prev = 11;
-                  _context.t0 = _context["catch"](0);
-                  console.error("Error during login:", _context.t0);
-                  alert("Login failed, please try again.");
-                case 15:
-                  _context.prev = 15;
-                  _this2.setState(_this2.state.setLoaderState("unloaded"));
-                  return _context.finish(15);
-                case 18:
-                case "end":
-                  return _context.stop();
-              }
-            }, _callee, null, [[0, 11, 15, 18]]);
-          })));
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("button", {
+        disabled: loaderState === "loading",
+        onClick: /*#__PURE__*/(0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7___default().mark(function _callee() {
+          var loginResponse, adminStatus;
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_7___default().wrap(function _callee$(_context) {
+            while (1) switch (_context.prev = _context.next) {
+              case 0:
+                // Set the loader state to loading
+                _this2.setState(_this2.state.setLoaderState("loading"));
+                _context.prev = 1;
+                _context.next = 4;
+                return (0,_login_api__WEBPACK_IMPORTED_MODULE_10__.login)({
+                  username: _this2.state.username,
+                  password: _this2.state.password
+                });
+              case 4:
+                loginResponse = _context.sent;
+                _context.next = 7;
+                return (0,_login_api__WEBPACK_IMPORTED_MODULE_10__.isAdminLoggedIn)();
+              case 7:
+                adminStatus = _context.sent;
+                console.log("Admin status response:", adminStatus);
+                if (adminStatus.isLoggedIn) {
+                  _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
+                    showMessage: true,
+                    errorMessage: "" // Clear any error message
+                  }));
+                  alert("Welcome, Admin ".concat(adminStatus.adminName || "Unknown", "!"));
+                } else {
+                  _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
+                    showMessage: false,
+                    errorMessage: "Login successful, but not an admin." // Display message for non-admin login
+                  }));
+                  alert("Login successful!");
+                }
+
+                // Clear the form fields
+                _this2.setState(_this2.state.clearFields);
+                _context.next = 17;
+                break;
+              case 13:
+                _context.prev = 13;
+                _context.t0 = _context["catch"](1);
+                console.error("Error during login:", _context.t0);
+                _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
+                  errorMessage: "Login failed, please try again." // Set error message
+                }));
+              case 17:
+                _context.prev = 17;
+                // Reset the loader state
+                _this2.setState(_this2.state.setLoaderState("unloaded"));
+                return _context.finish(17);
+              case 20:
+              case "end":
+                return _context.stop();
+            }
+          }, _callee, null, [[1, 13, 17, 20]]);
+        }))
+      }, loaderState === "loading" ? "Logging in..." : "Login")), showMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", null, "Welcome back, ", username, "!"), errorMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_8__.createElement("div", {
+        style: {
+          color: "red"
         }
-      }, "Login"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, this.state.showMessage && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_7__.createElement("div", null, "Welcome back, ", this.state.username, "!"))));
+      }, errorMessage));
     }
   }]);
-}(react__WEBPACK_IMPORTED_MODULE_7__.Component);
+}(react__WEBPACK_IMPORTED_MODULE_8__.Component);
 
 /***/ }),
 

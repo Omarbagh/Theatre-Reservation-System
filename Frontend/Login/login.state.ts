@@ -9,6 +9,7 @@ export type LoginState = Login & {
     clearFields: (state: LoginState) => LoginState
     showMessage: boolean
     setLoaderState: (loaderState: LoaderState) => (state: LoginState) => LoginState
+    errorMessage: string  // Add errorMessage to LoginState
 }
 
 export const initLogState: LoginState = {
@@ -16,6 +17,7 @@ export const initLogState: LoginState = {
     username: "",
     password: "",
     showMessage: false,
+    errorMessage: "",  // Initialize errorMessage
     updateUserName: (name: string) => (state: LoginState): LoginState => ({
         ...state,
         username: name
@@ -27,7 +29,6 @@ export const initLogState: LoginState = {
     clearFields: (state: LoginState): LoginState => {
         return {
             ...state,
-            //Clear the fieds here
             username: "",
             password: "",
         }
@@ -36,5 +37,4 @@ export const initLogState: LoginState = {
         ...state,
         loaderState: loaderState
     })
-
 }
