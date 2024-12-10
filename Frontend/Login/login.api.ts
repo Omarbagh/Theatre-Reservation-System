@@ -1,12 +1,25 @@
 import { Login } from "../Home/home.state";
+const BASE_URL = "http://localhost:5097/api/v1/Login";
 
-export const submit = async (login: Login): Promise<void> => {
-    //this i~s to make an API call
-    await fetch("api/v1/Login/Login", {
+export const login = async (data: any) => {
+    const response = await fetch(`${BASE_URL}/Login`, {
         method: "POST",
-        body: JSON.stringify(login),//stringify = serialize,
         headers: {
-            "content-type": "application/json"
-        }
-    })
-}
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+    return response.json();
+};
+
+export const isAdminLoggedIn = async () => {
+    const response = await fetch(`${BASE_URL}/IsAdminLoggedIn`, {
+        method: "GET",
+        credentials: "include", // Use this if cookies/session are required
+    });
+    if (!response.ok) {
+        throw new Error("Failed to fetch admin login status");
+    }
+    return response.json();
+};
+

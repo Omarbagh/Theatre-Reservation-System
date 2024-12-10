@@ -1,6 +1,6 @@
 import React from "react";
 import { initLogState, LoginState } from "./login.state";
-import { submit } from "./login.api";
+import { login, isAdminLoggedIn } from "./login.api";
 
 export class LoginForm extends React.Component<{}, LoginState> {
     constructor(props: {}) {
@@ -17,7 +17,9 @@ export class LoginForm extends React.Component<{}, LoginState> {
                     Username:
                     <input
                         value={this.state.username}
-                        onChange={e => this.setState(this.state.updateUserName(e.currentTarget.value))}
+                        onChange={(e) =>
+                            this.setState(this.state.updateUserName(e.currentTarget.value))
+                        }
                     />
                 </div>
                 <div>
@@ -25,7 +27,9 @@ export class LoginForm extends React.Component<{}, LoginState> {
                     <input
                         value={this.state.password}
                         type="password"
-                        onChange={e => this.setState(this.state.updatePassword(e.currentTarget.value))}
+                        onChange={(e) =>
+                            this.setState(this.state.updatePassword(e.currentTarget.value))
+                        }
                     />
                 </div>
 
@@ -35,17 +39,29 @@ export class LoginForm extends React.Component<{}, LoginState> {
                         onClick={() => {
                             this.setState(this.state.setLoaderState("loading"), async () => {
                                 try {
-                                    await submit({
+                                    await login({
                                         username: this.state.username,
                                         password: this.state.password,
                                     });
+
+                                    // Check admin status
+                                    const adminStatus = await isAdminLoggedIn();
+                                    console.log("Admin status response:", adminStatus);
+
+                                    if (adminStatus.isLoggedIn) {
+                                        alert(`Welcome, Admin ${adminStatus.adminName || "Unknown"}!`);
+                                    } else {
+                                        alert("Login successful!");
+                                    }
+
                                     this.setState(this.state.clearFields);
-                                    alert("Login successful!");
                                 } catch (error) {
+                                    console.error("Error during login:", error);
                                     alert("Login failed, please try again.");
                                 } finally {
                                     this.setState(this.state.setLoaderState("unloaded"));
                                 }
+
                             });
                         }}
                     >
@@ -53,7 +69,9 @@ export class LoginForm extends React.Component<{}, LoginState> {
                     </button>
 
                     <div>
-                        {this.state.showMessage && <div>Welcome back, {this.state.username}!</div>}
+                        {this.state.showMessage && (
+                            <div>Welcome back, {this.state.username}!</div>
+                        )}
                     </div>
                 </div>
             </div>
