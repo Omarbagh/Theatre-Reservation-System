@@ -1,5 +1,5 @@
 import { Login } from "../Home/home.state";
-const BASE_URL = "http://localhost:5097/api/v1/Login";
+const BASE_URL = "api/v1/Login"; //route
 
 export const login = async (data: any) => {
     const response = await fetch(`${BASE_URL}/Login`, {

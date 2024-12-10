@@ -18,7 +18,8 @@ var spa;
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
 
 
-var BASE_URL = "http://localhost:5097/api/v1/Login";
+var BASE_URL = "api/v1/Login"; //route
+
 var login = /*#__PURE__*/function () {
   var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(data) {
     var response;
@@ -29518,14 +29519,25 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var main = function main() {
-  var rootElement = document.querySelector('#app');
-  if (rootElement) {
-    react_dom__WEBPACK_IMPORTED_MODULE_1__.render(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Login_login__WEBPACK_IMPORTED_MODULE_2__.LoginForm, null), rootElement);
-  }
+  var rootElement = document.querySelector('#root');
+  react_dom__WEBPACK_IMPORTED_MODULE_1__.render(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Login_login__WEBPACK_IMPORTED_MODULE_2__.LoginForm, null), rootElement);
 };
 
 // Roep de main functie aan om de app te starten
-main();
+//main();
+
+// import React from 'react'
+// import ReactDOM from 'react-dom'
+// import { Home } from './Home/home'
+
+// export const main = () => {
+//   let rootElement = document.querySelector('#root')
+
+//   ReactDOM.render(
+//     <Home />,
+//     rootElement
+//     )
+// }
 })();
 
 spa = __webpack_exports__;
