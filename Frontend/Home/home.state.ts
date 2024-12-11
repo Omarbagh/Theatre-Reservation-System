@@ -12,19 +12,11 @@ export const initLoginState: Login = {
 
 };
 
-
-// export type ViewState = "login" | "dashboard"
-
-// export interface HomeState {
-//     view: ViewState,
-//     updateViewState: (view: ViewState) => (state: HomeState) => HomeState,
-
-// }
-
-// export const initHomeState: HomeState = {
-//     view: "login",
-//     updateViewState: (view: ViewState) => (state: HomeState): HomeState => ({
-//         ...state,
-//         view: view
-//     })
-// }
+export interface TheatreShow {
+    theatreid: number;
+    title: string;
+    description: string;
+    price: number;
+    venueid: number;
+}
+export type TheatreShowEntry = TheatreShow 

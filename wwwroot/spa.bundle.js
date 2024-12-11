@@ -17,7 +17,10 @@ var spa;
 /* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js");
 /* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js");
 /* harmony import */ var _babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/inherits */ "./node_modules/@babel/runtime/helpers/esm/inherits.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _Show_overview__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../Show/overview */ "./Show/overview.tsx");
+
 
 
 
@@ -26,22 +29,36 @@ var spa;
 function _callSuper(t, o, e) { return o = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__["default"])(o), (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__["default"])(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__["default"])(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 
+
 var DashboardForm = /*#__PURE__*/function (_React$Component) {
   function DashboardForm(props) {
     var _this;
     (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, DashboardForm);
     _this = _callSuper(this, DashboardForm, [props]);
-    _this.state = {};
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleButtonClick", function () {
+      _this.setState({
+        terug: true
+      });
+    });
+    _this.state = {
+      terug: false
+    };
     return _this;
   }
   (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_4__["default"])(DashboardForm, _React$Component);
   return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(DashboardForm, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("h2", null, "Welcome to the Dashboard!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", null, "You are now logged in and can view your dashboard."));
+      var terug = this.state.terug;
+      if (terug) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement(_Show_overview__WEBPACK_IMPORTED_MODULE_7__.Overview, null);
+      }
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h2", null, "Welcome to the Dashboard!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("p", null, "You are now logged in and can view your dashboard."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        onClick: this.handleButtonClick
+      }, "Go to Overview"));
     }
   }]);
-}(react__WEBPACK_IMPORTED_MODULE_5__.Component);
+}(react__WEBPACK_IMPORTED_MODULE_6__.Component);
 
 /***/ }),
 
@@ -330,6 +347,152 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
     }
   }]);
 }(react__WEBPACK_IMPORTED_MODULE_8__.Component);
+
+/***/ }),
+
+/***/ "./Show/overview.api.ts":
+/*!******************************!*\
+  !*** ./Show/overview.api.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   loadShows: () => (/* binding */ loadShows)
+/* harmony export */ });
+var loadShows = function loadShows() {
+  return fetch("api/v1/shows", {
+    method: "GET"
+  }).then(function (response) {
+    return response.json();
+  }).then(function (content) {
+    return content;
+  });
+};
+
+/***/ }),
+
+/***/ "./Show/overview.state.ts":
+/*!********************************!*\
+  !*** ./Show/overview.state.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initOverview: () => (/* binding */ initOverview)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+//implementing the state for the overview
+
+var initOverview = {
+  overviewLoader: {
+    kind: "loading"
+  },
+  updateLoader: function updateLoader(overviewLoader) {
+    return function (state) {
+      return _objectSpread(_objectSpread({}, state), {}, {
+        overviewLoader: overviewLoader
+      });
+    };
+  }
+};
+
+/***/ }),
+
+/***/ "./Show/overview.tsx":
+/*!***************************!*\
+  !*** ./Show/overview.tsx ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Overview: () => (/* binding */ Overview)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "./node_modules/@babel/runtime/helpers/esm/possibleConstructorReturn.js");
+/* harmony import */ var _babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js");
+/* harmony import */ var _babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/inherits */ "./node_modules/@babel/runtime/helpers/esm/inherits.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _overview_state__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./overview.state */ "./Show/overview.state.ts");
+/* harmony import */ var _overview_api__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./overview.api */ "./Show/overview.api.ts");
+/* harmony import */ var _Dashboard_dashboard__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../Dashboard/dashboard */ "./Dashboard/dashboard.tsx");
+
+
+
+
+
+
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _callSuper(t, o, e) { return o = (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__["default"])(o), (0,_babel_runtime_helpers_possibleConstructorReturn__WEBPACK_IMPORTED_MODULE_2__["default"])(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], (0,_babel_runtime_helpers_getPrototypeOf__WEBPACK_IMPORTED_MODULE_3__["default"])(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+
+
+
+
+//Changing this Overview component to a stateful component since we need the state
+
+var Overview = /*#__PURE__*/function (_React$Component) {
+  function Overview(props) {
+    var _this;
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, Overview);
+    _this = _callSuper(this, Overview, [props]);
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleButtonClick", function () {
+      _this.setState({
+        terug: true
+      });
+    });
+    _this.state = _objectSpread(_objectSpread({}, _overview_state__WEBPACK_IMPORTED_MODULE_7__.initOverview), {}, {
+      terug: false
+    });
+    return _this;
+  }
+  (0,_babel_runtime_helpers_inherits__WEBPACK_IMPORTED_MODULE_4__["default"])(Overview, _React$Component);
+  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(Overview, [{
+    key: "loadOverview",
+    value: function loadOverview() {
+      var _this2 = this;
+      if (this.state.overviewLoader.kind == "loading") {
+        (0,_overview_api__WEBPACK_IMPORTED_MODULE_8__.loadShows)() //now show is correctly stored inside the state after the promise resolves.
+        .then(function (show) {
+          return _this2.setState(_this2.state.updateLoader({
+            kind: "loaded",
+            value: show
+          }));
+        });
+      }
+    }
+
+    //lifecycle method of react
+    //special method triggered after the component is rendered
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.loadOverview();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var terug = this.state.terug;
+      if (terug) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement(_Dashboard_dashboard__WEBPACK_IMPORTED_MODULE_9__.DashboardForm, null);
+      }
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h1", null, "Overview of the shows"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null)), this.state.overviewLoader.kind == "loading" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Loading ...") : this.state.overviewLoader.value.map(function (show) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), "Title : ", show.title, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), "Description : ", show.description, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null));
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        onClick: this.handleButtonClick
+      }, "Go back to Dashboard")));
+    }
+  }]);
+}(react__WEBPACK_IMPORTED_MODULE_6__.Component);
 
 /***/ }),
 
