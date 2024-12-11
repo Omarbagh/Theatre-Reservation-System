@@ -1,15 +1,24 @@
 import React from "react";
 import { initLogState, LoginState } from "./login.state";
 import { login, isAdminLoggedIn } from "./login.api";
+import { DashboardForm } from "../Dashboard/dashboard";
 
-export class LoginForm extends React.Component<{}, LoginState> {
+
+export class LoginForm extends React.Component<{}, LoginState & { isAdminLoggedInn: boolean }> {
     constructor(props: {}) {
         super(props);
-        this.state = initLogState;
+        this.state = {
+            ...initLogState,
+            isAdminLoggedInn: false, // New state to track admin login status
+        }
     }
 
     render(): JSX.Element {
-        const { username, password, loaderState, showMessage, errorMessage } = this.state;
+        const { username, password, loaderState, showMessage, errorMessage, isAdminLoggedInn } = this.state;
+
+        if (isAdminLoggedInn) {
+            return <DashboardForm />;
+        }
 
         return (
             <div>
@@ -51,7 +60,7 @@ export class LoginForm extends React.Component<{}, LoginState> {
 
                                 if (adminStatus.isLoggedIn) {
                                     this.setState({
-                                        ...this.state,
+                                        isAdminLoggedInn: true,
                                         showMessage: true,
                                         errorMessage: "",
                                     });
