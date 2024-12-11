@@ -9,7 +9,7 @@ export class LoginForm extends React.Component<{}, LoginState & { isAdminLoggedI
         super(props);
         this.state = {
             ...initLogState,
-            isAdminLoggedInn: false, // New state to track admin login status
+            isAdminLoggedInn: false,
         }
     }
 
@@ -65,7 +65,7 @@ export class LoginForm extends React.Component<{}, LoginState & { isAdminLoggedI
                                         errorMessage: "",
                                     });
                                     alert(`Welcome, Admin ${adminStatus.adminName || "Unknown"}!`);
-                                    this.setState(this.state.updateViewState("dashboard"));
+                                    // this.setState(this.state.updateViewState("dashboard"));
                                 } else {
                                     this.setState({
                                         ...this.state,

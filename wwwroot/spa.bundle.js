@@ -38,7 +38,7 @@ var DashboardForm = /*#__PURE__*/function (_React$Component) {
   return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(DashboardForm, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("h2", null, "Welcome to the Dashboard Page"));
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("h2", null, "Welcome to the Dashboard!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_5__.createElement("p", null, "You are now logged in and can view your dashboard."));
     }
   }]);
 }(react__WEBPACK_IMPORTED_MODULE_5__.Component);
@@ -237,7 +237,7 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
     (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_2__["default"])(this, LoginForm);
     _this = _callSuper(this, LoginForm, [props]);
     _this.state = _objectSpread(_objectSpread({}, _login_state__WEBPACK_IMPORTED_MODULE_9__.initLogState), {}, {
-      isAdminLoggedInn: false // New state to track admin login status
+      isAdminLoggedInn: false
     });
     return _this;
   }
@@ -290,12 +290,11 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
                 if (adminStatus.isLoggedIn) {
                   _this2.setState({
                     isAdminLoggedInn: true,
-                    // Set the state to redirect to the dashboard
                     showMessage: true,
                     errorMessage: ""
                   });
                   alert("Welcome, Admin ".concat(adminStatus.adminName || "Unknown", "!"));
-                  _this2.setState(_this2.state.updateViewState("dashboard"));
+                  // this.setState(this.state.updateViewState("dashboard"));
                 } else {
                   _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
                     showMessage: false,
