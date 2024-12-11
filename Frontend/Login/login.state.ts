@@ -1,6 +1,7 @@
 import { Login } from "../Home/home.state";
 
 export type LoaderState = "unloaded" | "loading" | "loaded";
+export type ViewState = "login" | "dashboard";
 
 export type LoginState = Login & {
     loaderState: LoaderState;
@@ -10,6 +11,8 @@ export type LoginState = Login & {
     showMessage: boolean;
     setLoaderState: (loaderState: LoaderState) => (state: LoginState) => LoginState;
     errorMessage: string;
+    view: ViewState;
+    updateViewState: (view: ViewState) => (state: LoginState) => LoginState;
 };
 
 export const initLogState: LoginState = {
@@ -34,5 +37,10 @@ export const initLogState: LoginState = {
     setLoaderState: (loaderState: LoaderState) => (state: LoginState): LoginState => ({
         ...state,
         loaderState: loaderState,
+    }),
+    view: "login",
+    updateViewState: (view: ViewState) => (state: LoginState): LoginState => ({
+        ...state,
+        view: view,
     }),
 };

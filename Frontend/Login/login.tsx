@@ -65,6 +65,7 @@ export class LoginForm extends React.Component<{}, LoginState & { isAdminLoggedI
                                         errorMessage: "",
                                     });
                                     alert(`Welcome, Admin ${adminStatus.adminName || "Unknown"}!`);
+                                    this.setState(this.state.updateViewState("dashboard"));
                                 } else {
                                     this.setState({
                                         ...this.state,

@@ -179,6 +179,14 @@ var initLogState = {
         loaderState: loaderState
       });
     };
+  },
+  view: "login",
+  updateViewState: function updateViewState(view) {
+    return function (state) {
+      return _objectSpread(_objectSpread({}, state), {}, {
+        view: view
+      });
+    };
   }
 };
 
@@ -287,6 +295,7 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
                     errorMessage: ""
                   });
                   alert("Welcome, Admin ".concat(adminStatus.adminName || "Unknown", "!"));
+                  _this2.setState(_this2.state.updateViewState("dashboard"));
                 } else {
                   _this2.setState(_objectSpread(_objectSpread({}, _this2.state), {}, {
                     showMessage: false,
