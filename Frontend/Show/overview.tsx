@@ -1,16 +1,17 @@
 import React from "react";
 import { TheatreShowEntry, TheatreShow } from "../Home/home.state";
 import { initOverview, OverviewState } from "./overview.state";
-import { loadShows, updateShow } from "./overview.api";
+import { loadShows, updateShow, deleteShow } from "./overview.api";
 import { DashboardForm } from "../Dashboard/dashboard";
 
-export class Overview extends React.Component<{}, OverviewState & { terug: boolean; editingShow: TheatreShow | null }>{
+export class Overview extends React.Component<{}, OverviewState & { terug: boolean; editingShow: TheatreShow | null, showToDelete: TheatreShow | null }>{
     constructor(props: {}) {
         super(props);
         this.state = {
             ...initOverview,
             terug: false,
-            editingShow: null, // Houd bij welke show wordt bewerkt
+            editingShow: null,
+            showToDelete: null, // Track which show is selected for deletion
         };
     }
 
@@ -47,11 +48,45 @@ export class Overview extends React.Component<{}, OverviewState & { terug: boole
         if (editingShow) {
             updateShow(editingShow.theatreid, editingShow)
                 .then(() => {
-                    this.setState({ editingShow: null }); // Sluit het formulier na opslaan
-                    this.loadOverview(); // Herlaad de lijst van shows
+                    this.setState({ editingShow: null }); // Close the form after saving
+                    this.loadOverview(); // Reload the list of shows
                 })
                 .catch((err) => console.error("Failed to update show:", err));
         }
+    };
+
+    handleDeleteClick = (show: TheatreShow) => {
+        // Debugging step: Log the show and its theatreid
+        console.log("Deleting show:", show);
+
+        // Ensure that show.theatreid is correctly passed to deleteShow
+        if (show.theatreid) {
+            this.setState({ showToDelete: show });
+        } else {
+            console.error("Invalid show ID:", show);
+        }
+    };
+
+    handleConfirmDelete = () => {
+        const { showToDelete } = this.state;
+
+        // Debugging step: Check showToDelete and its theatreid
+        console.log("Confirming delete for show:", showToDelete);
+
+        if (showToDelete && showToDelete.theatreid) {
+            deleteShow(showToDelete.theatreid)  // Make sure you use showToDelete.theatreid
+                .then(() => {
+                    this.setState({ showToDelete: null });
+                    this.loadOverview(); // Reload the list of shows after deletion
+                })
+                .catch((err) => console.error("Failed to delete show:", err));
+        } else {
+            console.error("Show ID is missing for deletion", showToDelete);
+        }
+    };
+
+    handleCancelDelete = () => {
+        this.setState({ showToDelete: null }); // Close the confirmation dialog without deleting
     };
 
     handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -66,7 +101,7 @@ export class Overview extends React.Component<{}, OverviewState & { terug: boole
     };
 
     render(): JSX.Element {
-        const { terug, editingShow } = this.state;
+        const { terug, editingShow, showToDelete } = this.state;
         if (terug) {
             return <DashboardForm />;
         }
@@ -81,12 +116,13 @@ export class Overview extends React.Component<{}, OverviewState & { terug: boole
                     <div>Loading ...</div>
                 ) : (
                     this.state.overviewLoader.value.map((show) => (
-                        <div key={show.theatreid}>
+                        <div key={show.theatreid}>  {/* Make sure theatreid is unique */}
                             <br />
                             <div>Title: {show.title}</div>
                             <div>Description: {show.description}</div>
                             <br />
                             <button onClick={() => this.handleEditClick(show)}>Edit</button>
+                            <button onClick={() => this.handleDeleteClick(show)}>Delete</button>
                         </div>
                     ))
                 )}
@@ -119,6 +155,14 @@ export class Overview extends React.Component<{}, OverviewState & { terug: boole
                                 Cancel
                             </button>
                         </form>
+                    </div>
+                )}
+
+                {showToDelete && (
+                    <div className="confirmation-dialog">
+                        <p>Are you sure you want to delete this show?</p>
+                        <button onClick={this.handleConfirmDelete}>Yes, delete</button>
+                        <button onClick={this.handleCancelDelete}>Cancel</button>
                     </div>
                 )}
 

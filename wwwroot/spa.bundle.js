@@ -358,6 +358,7 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
 
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   deleteShow: () => (/* binding */ deleteShow),
 /* harmony export */   loadShows: () => (/* binding */ loadShows),
 /* harmony export */   updateShow: () => (/* binding */ updateShow)
 /* harmony export */ });
@@ -377,6 +378,11 @@ var updateShow = function updateShow(id, updatedShow) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(updatedShow)
+  });
+};
+var deleteShow = function deleteShow(id) {
+  return fetch("api/v1/shows/DeleteShow/".concat(id), {
+    method: "DELETE"
   });
 };
 
@@ -468,12 +474,49 @@ var Overview = /*#__PURE__*/function (_React$Component) {
         (0,_overview_api__WEBPACK_IMPORTED_MODULE_8__.updateShow)(editingShow.theatreid, editingShow).then(function () {
           _this.setState({
             editingShow: null
-          }); // Sluit het formulier na opslaan
-          _this.loadOverview(); // Herlaad de lijst van shows
+          }); // Close the form after saving
+          _this.loadOverview(); // Reload the list of shows
         })["catch"](function (err) {
           return console.error("Failed to update show:", err);
         });
       }
+    });
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleDeleteClick", function (show) {
+      // Debugging step: Log the show and its theatreid
+      console.log("Deleting show:", show);
+
+      // Ensure that show.theatreid is correctly passed to deleteShow
+      if (show.theatreid) {
+        _this.setState({
+          showToDelete: show
+        });
+      } else {
+        console.error("Invalid show ID:", show);
+      }
+    });
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleConfirmDelete", function () {
+      var showToDelete = _this.state.showToDelete;
+
+      // Debugging step: Check showToDelete and its theatreid
+      console.log("Confirming delete for show:", showToDelete);
+      if (showToDelete && showToDelete.theatreid) {
+        (0,_overview_api__WEBPACK_IMPORTED_MODULE_8__.deleteShow)(showToDelete.theatreid) // Make sure you use showToDelete.theatreid
+        .then(function () {
+          _this.setState({
+            showToDelete: null
+          });
+          _this.loadOverview(); // Reload the list of shows after deletion
+        })["catch"](function (err) {
+          return console.error("Failed to delete show:", err);
+        });
+      } else {
+        console.error("Show ID is missing for deletion", showToDelete);
+      }
+    });
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleCancelDelete", function () {
+      _this.setState({
+        showToDelete: null
+      }); // Close the confirmation dialog without deleting
     });
     (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleChange", function (e) {
       var _e$target = e.target,
@@ -487,7 +530,8 @@ var Overview = /*#__PURE__*/function (_React$Component) {
     });
     _this.state = _objectSpread(_objectSpread({}, _overview_state__WEBPACK_IMPORTED_MODULE_7__.initOverview), {}, {
       terug: false,
-      editingShow: null // Houd bij welke show wordt bewerkt
+      editingShow: null,
+      showToDelete: null // Track which show is selected for deletion
     });
     return _this;
   }
@@ -520,18 +564,23 @@ var Overview = /*#__PURE__*/function (_React$Component) {
       var _this3 = this;
       var _this$state = this.state,
         terug = _this$state.terug,
-        editingShow = _this$state.editingShow;
+        editingShow = _this$state.editingShow,
+        showToDelete = _this$state.showToDelete;
       if (terug) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement(_Dashboard_dashboard__WEBPACK_IMPORTED_MODULE_9__.DashboardForm, null);
       }
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h2", null, "Overview of shows"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null)), this.state.overviewLoader.kind === "loading" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Loading ...") : this.state.overviewLoader.value.map(function (show) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", {
           key: show.theatreid
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Title: ", show.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Description: ", show.description), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        }, "  ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Title: ", show.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Description: ", show.description), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
           onClick: function onClick() {
             return _this3.handleEditClick(show);
           }
-        }, "Edit"));
+        }, "Edit"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+          onClick: function onClick() {
+            return _this3.handleDeleteClick(show);
+          }
+        }, "Delete"));
       }), editingShow && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h3", null, "Edit Show"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("form", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("label", null, "Title:", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("input", {
         type: "text",
         name: "title",
@@ -551,7 +600,13 @@ var Overview = /*#__PURE__*/function (_React$Component) {
             editingShow: null
           });
         }
-      }, "Cancel"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+      }, "Cancel"))), showToDelete && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", {
+        className: "confirmation-dialog"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("p", null, "Are you sure you want to delete this show?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        onClick: this.handleConfirmDelete
+      }, "Yes, delete"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        onClick: this.handleCancelDelete
+      }, "Cancel")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
         onClick: this.handleButtonClick
       }, "Go back to Dashboard")));
     }
