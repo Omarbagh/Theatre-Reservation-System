@@ -358,7 +358,8 @@ var LoginForm = /*#__PURE__*/function (_React$Component) {
 
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   loadShows: () => (/* binding */ loadShows)
+/* harmony export */   loadShows: () => (/* binding */ loadShows),
+/* harmony export */   updateShow: () => (/* binding */ updateShow)
 /* harmony export */ });
 var loadShows = function loadShows() {
   return fetch("api/v1/shows", {
@@ -367,6 +368,15 @@ var loadShows = function loadShows() {
     return response.json();
   }).then(function (content) {
     return content;
+  });
+};
+var updateShow = function updateShow(id, updatedShow) {
+  return fetch("api/v1/shows/UpdateShow/".concat(id), {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(updatedShow)
   });
 };
 
@@ -437,9 +447,6 @@ function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.
 
 
 
-
-//Changing this Overview component to a stateful component since we need the state
-
 var Overview = /*#__PURE__*/function (_React$Component) {
   function Overview(props) {
     var _this;
@@ -450,8 +457,37 @@ var Overview = /*#__PURE__*/function (_React$Component) {
         terug: true
       });
     });
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleEditClick", function (show) {
+      _this.setState({
+        editingShow: show
+      });
+    });
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleSaveClick", function () {
+      var editingShow = _this.state.editingShow;
+      if (editingShow) {
+        (0,_overview_api__WEBPACK_IMPORTED_MODULE_8__.updateShow)(editingShow.theatreid, editingShow).then(function () {
+          _this.setState({
+            editingShow: null
+          }); // Sluit het formulier na opslaan
+          _this.loadOverview(); // Herlaad de lijst van shows
+        })["catch"](function (err) {
+          return console.error("Failed to update show:", err);
+        });
+      }
+    });
+    (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])(_this, "handleChange", function (e) {
+      var _e$target = e.target,
+        name = _e$target.name,
+        value = _e$target.value;
+      _this.setState(function (prevState) {
+        return {
+          editingShow: _objectSpread(_objectSpread({}, prevState.editingShow), {}, (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_5__["default"])({}, name, value))
+        };
+      });
+    });
     _this.state = _objectSpread(_objectSpread({}, _overview_state__WEBPACK_IMPORTED_MODULE_7__.initOverview), {}, {
-      terug: false
+      terug: false,
+      editingShow: null // Houd bij welke show wordt bewerkt
     });
     return _this;
   }
@@ -460,19 +496,19 @@ var Overview = /*#__PURE__*/function (_React$Component) {
     key: "loadOverview",
     value: function loadOverview() {
       var _this2 = this;
-      if (this.state.overviewLoader.kind == "loading") {
-        (0,_overview_api__WEBPACK_IMPORTED_MODULE_8__.loadShows)() //now show is correctly stored inside the state after the promise resolves.
-        .then(function (show) {
-          return _this2.setState(_this2.state.updateLoader({
-            kind: "loaded",
-            value: show
-          }));
+      if (this.state.overviewLoader.kind === "loading") {
+        (0,_overview_api__WEBPACK_IMPORTED_MODULE_8__.loadShows)().then(function (shows) {
+          return _this2.setState({
+            overviewLoader: {
+              kind: "loaded",
+              value: shows
+            }
+          });
+        })["catch"](function (err) {
+          return console.error("Failed to load shows:", err);
         });
       }
     }
-
-    //lifecycle method of react
-    //special method triggered after the component is rendered
   }, {
     key: "componentDidMount",
     value: function componentDidMount() {
@@ -481,13 +517,41 @@ var Overview = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var terug = this.state.terug;
+      var _this3 = this;
+      var _this$state = this.state,
+        terug = _this$state.terug,
+        editingShow = _this$state.editingShow;
       if (terug) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement(_Dashboard_dashboard__WEBPACK_IMPORTED_MODULE_9__.DashboardForm, null);
       }
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h2", null, "Overview of shows"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null)), this.state.overviewLoader.kind == "loading" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Loading ...") : this.state.overviewLoader.value.map(function (show) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), "Title : ", show.title, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), "Description : ", show.description, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null));
-      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h2", null, "Overview of shows"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null)), this.state.overviewLoader.kind === "loading" ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Loading ...") : this.state.overviewLoader.value.map(function (show) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", {
+          key: show.theatreid
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Title: ", show.title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, "Description: ", show.description), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+          onClick: function onClick() {
+            return _this3.handleEditClick(show);
+          }
+        }, "Edit"));
+      }), editingShow && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("h3", null, "Edit Show"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("form", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("label", null, "Title:", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("input", {
+        type: "text",
+        name: "title",
+        value: editingShow.title,
+        onChange: this.handleChange
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("label", null, "Description:", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("textarea", {
+        name: "description",
+        value: editingShow.description,
+        onChange: this.handleChange
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        type: "button",
+        onClick: this.handleSaveClick
+      }, "Save"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
+        type: "button",
+        onClick: function onClick() {
+          return _this3.setState({
+            editingShow: null
+          });
+        }
+      }, "Cancel"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_6__.createElement("button", {
         onClick: this.handleButtonClick
       }, "Go back to Dashboard")));
     }

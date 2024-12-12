@@ -1,6 +1,6 @@
 #login
 
-POST http://localhost:5097/api/v1/login/login
+POST http://localhost:5000/api/v1/login/login
 Content-Type: application/json
 
 {
@@ -9,10 +9,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:5097/api/v1/login/logout
+GET http://localhost:5000/api/v1/login/logout
 
 ###
-GET http://localhost:5097/api/v1/login/IsAdminLoggedIn
+GET http://localhost:5000/api/v1/login/IsAdminLoggedIn
 
 
 
@@ -21,35 +21,35 @@ GET http://localhost:5097/api/v1/login/IsAdminLoggedIn
 ### Reservation Management (Admin Only)
 
 # Get all reservations
-GET http://localhost:5097/api/v1/admin/reservations
+GET http://localhost:5000/api/v1/admin/reservations
 
 # Get reservations filtered by showId
 ###
-GET http://localhost:5097/api/v1/admin/reservations?showId=1
+GET http://localhost:5000/api/v1/admin/reservations?showId=1
 
 # Get reservations filtered by date
 ###
-GET http://localhost:5097/api/v1/admin/reservations?date=2024-10-10
+GET http://localhost:5000/api/v1/admin/reservations?date=2024-10-10
 
 # Get reservations filtered by showId and date
 ###
-GET http://localhost:5097/api/v1/admin/reservations?showId=1&date=2024-10-10
+GET http://localhost:5000/api/v1/admin/reservations?showId=1&date=2024-10-10
 
 # Search reservations by email
 ###
-GET http://localhost:5097/api/v1/admin/reservations/search?email=john.doe@example.com
+GET http://localhost:5000/api/v1/admin/reservations/search?email=john.doe@example.com
 
 # Search reservations by email and reservationId
 ###
-GET http://localhost:5097/api/v1/admin/reservations/search?email=john.doe@example.com&reservationId=46
+GET http://localhost:5000/api/v1/admin/reservations/search?email=john.doe@example.com&reservationId=46
 
 # Mark reservation as used by reservationId
 ###
-PUT http://localhost:5097/api/v1/admin/reservations/46/mark-used
+PUT http://localhost:5000/api/v1/admin/reservations/46/mark-used
 
 # Delete reservation by reservationId
 ###
-DELETE http://localhost:5097/api/v1/admin/reservations/46
+DELETE http://localhost:5000/api/v1/admin/reservations/46
 
 
 
@@ -59,35 +59,35 @@ DELETE http://localhost:5097/api/v1/admin/reservations/46
 
 # Get all snacks
 ###
-GET http://localhost:5097/api/v1/snacks
+GET http://localhost:5000/api/v1/snacks
 
 # Get snack by id
 ###
-GET http://localhost:5097/api/v1/snacks/1
+GET http://localhost:5000/api/v1/snacks/1
 
 # Create a new snack (Admin only)
 ###
-POST http://localhost:5097/api/v1/snacks HTTP/1.1
+POST http://localhost:5000/api/v1/snacks HTTP/1.1
 content-type: application/json
  
 {"SnacksId":100,"Name":"Popcorn","Capacity":100,"Amount":50,"Price":5}
 ###
 
-PUT http://localhost:5097/api/v1/snacks/100 HTTP/1.1
+PUT http://localhost:5000/api/v1/snacks/100 HTTP/1.1
 content-type: application/json
 
 {"SnacksId":100,"Name":"Popcorn","Capacity":10,"Amount":5,"Price":5}
  
 ###
-DELETE http://localhost:5097/api/v1/snacks/100
+DELETE http://localhost:5000/api/v1/snacks/100
 
 
 
 #snack reservation
 ###
-GET http://localhost:5097/api/v1/snacks/Reservation 
+GET http://localhost:5000/api/v1/snacks/Reservation 
 ###
-POST http://localhost:5097/api/v1/snacks/Reservation HTTP/1.1
+POST http://localhost:5000/api/v1/snacks/Reservation HTTP/1.1
 content-type: application/json
  
 {
@@ -113,9 +113,9 @@ content-type: application/json
 #admindashboard
 
 ###
-GET http://localhost:5097/api/v1/admindashboard
+GET http://localhost:5000/api/v1/admindashboard
 ###
-GET http://localhost:5097/api/v1/admindashboard/56
+GET http://localhost:5000/api/v1/admindashboard/56
 
 
 
@@ -123,7 +123,7 @@ GET http://localhost:5097/api/v1/admindashboard/56
 
 #reservation
 ###
-POST http://localhost:5097/api/v1/Reservation HTTP/1.1
+POST http://localhost:5000/api/v1/Reservation HTTP/1.1
 content-type: application/json 
 
 {
@@ -154,43 +154,48 @@ content-type: application/json
 
 #show
 
-GET http://localhost:5097/api/v1/shows
+GET http://localhost:5000/api/v1/shows
 ###
-GET http://localhost:5097/api/v1/shows/1
+GET http://localhost:5000/api/v1/shows/1
 ###
-GET http://localhost:5097/api/v1/shows/filter/title?filter=The Lion King
+GET http://localhost:5000/api/v1/shows/filter/title?filter=The Lion King
 ###
-GET http://localhost:5097/api/v1/shows/filter/location?location=1
+GET http://localhost:5000/api/v1/shows/filter/location?location=1
 ###
-GET http://localhost:5097/api/v1/shows/filter/date?date1=2024-10-01&date2=2024-10-31&sortBy=date&sortOrder=asc
+GET http://localhost:5000/api/v1/shows/filter/date?date1=2024-10-01&date2=2024-10-31&sortBy=date&sortOrder=asc
 ###
-GET http://localhost:5097/api/v1/shows/filter/date?date1=2024-10-01&date2=2024-10-31&sortBy=title&sortOrder=asc
+GET http://localhost:5000/api/v1/shows/filter/date?date1=2024-10-01&date2=2024-10-31&sortBy=title&sortOrder=asc
 ###
-POST http://localhost:5097/api/v1/shows/AddShow HTTP/1.1
+POST http://localhost:5000/api/v1/shows/AddShow HTTP/1.1
 content-type: application/json 
 
 {"Title":"New Show Title","Description":"Description of the new show.","Price":29.99,"Venue":{"VenueId":1}}
 
 ###
-PUT http://localhost:5097/api/v1/shows/UpdateShow/1 HTTP/1.1
+PUT http://localhost:5000/api/v1/shows/UpdateShow/1 HTTP/1.1
 content-type: application/json 
 
 {
   "TheatreShowId": 1,
-  "Title": "The Phantom of the Opera - Updated",
+  "Title": "The Phantom of the Operdea - jad Updated",
   "Description": "An updated description for the show.",
   "Price": 49.99,
-  "Venue": {
-    "VenueId": 1,
-    "Name": "Royal Theatre",
-    "Capacity": 600
-  },
   "theatreShowDates": [
     {
-      "TheatreShowDateId": 1,
-      "DateAndTime": "2024-11-01T19:00:00"
+      "TheatreShowDateId": 6,
+      "DateAndTime": "2024-11-01T19:00:00",
+      "Reservations": null,
+      "TheatreShow": null
     }
-  ]
+  ],
+  "Venue": {
+    "VenueId": 1,
+    "Name": "Grand Theatre",
+    "Capacity": 500,
+    "TheatreShows": [
+      null
+    ]
+  }
 }
 ###
-DELETE http://localhost:5097/api/v1/shows/DeleteShow/1
+DELETE http://localhost:5000/api/v1/shows/DeleteShow/1

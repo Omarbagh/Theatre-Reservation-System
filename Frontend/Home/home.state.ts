@@ -18,5 +18,6 @@ export interface TheatreShow {
     description: string;
     price: number;
     venueid: number;
+    theatershow: Date;
 }
-export type TheatreShowEntry = TheatreShow 
+export type TheatreShowEntry = TheatreShow
